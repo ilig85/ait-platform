@@ -33,15 +33,15 @@ export default function SignupPage() {
         password,
         options: {
           data: { full_name: name },
-          emailRedirectTo:
-            process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ??
-            `${window.location.origin}/auth/callback`,
         },
       })
       if (error) {
         setError(error.message)
         return
       }
+      // Store the email so /verify-email can show it and call verifyOtp.
+      // Never store the password here.
+      sessionStorage.setItem("pending_verification_email", email)
       router.push("/verify-email")
     })
   }

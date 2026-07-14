@@ -32,15 +32,14 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const isAuthRoute =
-    pathname.startsWith("/(auth)") ||
+  // All routes that must be reachable while logged out
+  const isPublicRoute =
     pathname === "/login" ||
     pathname === "/signup" ||
-    pathname.startsWith("/auth/")
-
-  const isPublicRoute =
-    isAuthRoute ||
-    pathname === "/" ||
+    pathname === "/forgot-password" ||
+    pathname === "/verify-email" ||
+    pathname === "/update-password" ||
+    pathname.startsWith("/auth/") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/")
 
@@ -51,6 +50,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Logged-in users away from auth pages — do NOT redirect /verify-email,
+  // /update-password, /forgot-password (they may need those even while logged in)
   if (user && (pathname === "/login" || pathname === "/signup")) {
     const url = request.nextUrl.clone()
     url.pathname = "/"
