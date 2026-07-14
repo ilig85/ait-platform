@@ -39,6 +39,13 @@ export default function SignupPage() {
         setError(error.message)
         return
       }
+      // Supabase returns success (error: null) for existing emails ("user_repeated_signup").
+      // The only safe way to detect this without leaking account existence is checking
+      // that identities is empty — a genuinely new unverified user always has identities.
+      if (!data.user?.identities?.length) {
+        setError("An account with this email already exists. Please log in instead.")
+        return
+      }
       // Store the email so /verify-email can show it and call verifyOtp.
       // Never store the password here.
       sessionStorage.setItem("pending_verification_email", email)
