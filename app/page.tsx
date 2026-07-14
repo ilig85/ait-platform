@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
 import { AppShell } from "@/components/ait/app-shell"
 import { AitHeader } from "@/components/ait/header"
 import { MetricCards } from "@/components/overview/metric-cards"
@@ -5,7 +7,10 @@ import { ConversationsChart } from "@/components/overview/conversations-chart"
 import { AiCommandCenter } from "@/components/overview/ai-command-center"
 import { ChannelHealth } from "@/components/overview/channel-health"
 
-export default function OverviewPage() {
+export default async function OverviewPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect("/login")
   return (
     <AppShell>
       <AitHeader

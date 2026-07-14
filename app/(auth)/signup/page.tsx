@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Zap } from "lucide-react"
+import { Zap, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,6 +11,7 @@ import { useI18n, LOCALES, type Locale } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ChevronDown } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
 export default function SignupPage() {
   const { t, locale, setLocale } = useI18n()
@@ -18,13 +19,38 @@ export default function SignupPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [isPending, startTransition] = useTransition()
 
-  async function handleSignup(e: React.FormEvent) {
+  function handleSignup(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
-    await new Promise((r) => setTimeout(r, 800))
-    router.push("/verify-email")
+    setError("")
+
+    startTransition(async () => {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: name },
+        },
+      })
+      if (error) {
+        setError(error.message)
+        return
+      }
+      // Supabase returns success (error: null) for existing emails ("user_repeated_signup").
+      // The only safe way to detect this without leaking account existence is checking
+      // that identities is empty — a genuinely new unverified user always has identities.
+      if (!data.user?.identities?.length) {
+        setError("An account with this email already exists. Please log in instead.")
+        return
+      }
+      // Store the email so /verify-email can show it and call verifyOtp.
+      // Never store the password here.
+      sessionStorage.setItem("pending_verification_email", email)
+      router.push("/verify-email")
+    })
   }
 
   return (
@@ -73,8 +99,10 @@ export default function SignupPage() {
             <Label htmlFor="password">{t("auth_password")}</Label>
             <Input id="password" type="password" placeholder="min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
           </div>
-          <Button type="submit" className="w-full bg-[#0F766E] hover:bg-[#0F766E]/90 text-white" disabled={loading}>
-            {loading ? "Creating account..." : t("auth_signup")}
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Button type="submit" className="w-full bg-[#0F766E] hover:bg-[#0F766E]/90 text-white" disabled={isPending}>
+            {isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
+            {isPending ? "Creating account…" : t("auth_signup")}
           </Button>
         </form>
 

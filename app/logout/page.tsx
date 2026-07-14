@@ -1,14 +1,26 @@
 "use client"
 
+import { useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { LogOut, Zap } from "lucide-react"
+import { LogOut, Zap, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useI18n } from "@/lib/i18n"
+import { createClient } from "@/lib/supabase/client"
 
 export default function LogoutPage() {
   const { t } = useI18n()
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  function handleLogout() {
+    startTransition(async () => {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push("/login")
+      router.refresh()
+    })
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
@@ -29,10 +41,12 @@ export default function LogoutPage() {
             <Link href="/">{t("common_cancel")}</Link>
           </Button>
           <Button
-            onClick={() => router.push("/login")}
+            onClick={handleLogout}
+            disabled={isPending}
             className="flex-1 bg-[#0F766E] hover:bg-[#0F766E]/90 text-white"
           >
-            {t("nav_logout")}
+            {isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
+            {isPending ? "Signing out…" : t("nav_logout")}
           </Button>
         </div>
       </div>
