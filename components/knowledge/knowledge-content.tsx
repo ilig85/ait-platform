@@ -1,41 +1,60 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Search, BookOpen, Pencil, Trash2, CheckCircle2, Clock, ChevronDown, ChevronUp, X } from "lucide-react"
+import { Plus, Search, BookOpen, Pencil, Trash2, CheckCircle2, Clock, ChevronDown, ChevronUp, X, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { mockKnowledge } from "@/lib/mock-data"
-import type { KnowledgeItem } from "@/lib/mock-data"
+import { DEMO_KNOWLEDGE } from "@/lib/mock-data"
+import type { KnowledgeItem, KnowledgeType, KnowledgeStatus } from "@/lib/mock-data"
 
-const CATEGORIES = ["All", "FAQ", "Service", "Price", "Policy"] as const
+const TYPE_LABELS: Record<KnowledgeType, string> = {
+  faq: "FAQ", product: "Product", price: "Price",
+  policy: "Policy", delivery: "Delivery", hours: "Hours",
+}
+const TYPE_COLORS: Record<KnowledgeType, string> = {
+  faq:      "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  price:    "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+  product:  "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  policy:   "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+  delivery: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
+  hours:    "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+}
+
+const FILTER_TYPES: Array<KnowledgeType | "all"> = ["all", "faq", "price", "policy", "delivery", "hours", "product"]
 
 export function KnowledgeContent() {
-  const [items, setItems] = useState<KnowledgeItem[]>(mockKnowledge)
-  const [activeCategory, setActiveCategory] = useState<string>("All")
+  const [items, setItems] = useState<KnowledgeItem[]>(DEMO_KNOWLEDGE)
+  const [activeType, setActiveType] = useState<KnowledgeType | "all">("all")
   const [search, setSearch] = useState("")
   const [expanded, setExpanded] = useState<string | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
   const [editValue, setEditValue] = useState("")
   const [showAdd, setShowAdd] = useState(false)
-  const [newItem, setNewItem] = useState({ question: "", answer: "", category: "FAQ" as KnowledgeItem["category"] })
+  const [newItem, setNewItem] = useState({ title: "", content: "", type: "faq" as KnowledgeType })
 
   const filtered = items.filter(item => {
-    const matchCat = activeCategory === "All" || item.category === activeCategory
-    const matchSearch = item.question.toLowerCase().includes(search.toLowerCase()) || item.answer.toLowerCase().includes(search.toLowerCase())
-    return matchCat && matchSearch
+    const matchType = activeType === "all" || item.type === activeType
+    const matchSearch =
+      item.title.toLowerCase().includes(search.toLowerCase()) ||
+      item.content.toLowerCase().includes(search.toLowerCase())
+    return matchType && matchSearch
   })
 
   const startEdit = (item: KnowledgeItem) => {
     setEditing(item.id)
-    setEditValue(item.answer)
+    setEditValue(item.content)
   }
 
   const saveEdit = (id: string) => {
-    setItems(prev => prev.map(i => i.id === id ? { ...i, answer: editValue, verified: false } : i))
+    setItems(prev => prev.map(i =>
+      i.id === id ? { ...i, content: editValue, status: "needs_review" as KnowledgeStatus } : i
+    ))
     setEditing(null)
   }
 
   const toggleVerify = (id: string) => {
-    setItems(prev => prev.map(i => i.id === id ? { ...i, verified: !i.verified } : i))
+    setItems(prev => prev.map(i =>
+      i.id === id ? { ...i, status: (i.status === "verified" ? "needs_review" : "verified") as KnowledgeStatus } : i
+    ))
   }
 
   const deleteItem = (id: string) => {
@@ -44,15 +63,20 @@ export function KnowledgeContent() {
   }
 
   const addItem = () => {
-    if (!newItem.question.trim() || !newItem.answer.trim()) return
+    if (!newItem.title.trim() || !newItem.content.trim()) return
     setItems(prev => [...prev, {
       id: `k-${Date.now()}`,
-      ...newItem,
-      verified: false,
-      lastUpdated: "Just now",
+      type: newItem.type,
+      title: newItem.title,
+      content: newItem.content,
+      languages: ["ru"],
+      status: "draft" as KnowledgeStatus,
+      lastEditor: "Manager",
+      lastVerified: new Date().toISOString(),
       usageCount: 0,
+      source: "manual" as const,
     }])
-    setNewItem({ question: "", answer: "", category: "FAQ" })
+    setNewItem({ title: "", content: "", type: "faq" })
     setShowAdd(false)
   }
 
@@ -82,33 +106,35 @@ export function KnowledgeContent() {
             </button>
           </div>
           <select
-            value={newItem.category}
-            onChange={e => setNewItem(prev => ({ ...prev, category: e.target.value as KnowledgeItem["category"] }))}
+            value={newItem.type}
+            onChange={e => setNewItem(prev => ({ ...prev, type: e.target.value as KnowledgeType }))}
             className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
           >
-            {["FAQ", "Service", "Price", "Policy"].map(c => <option key={c} value={c}>{c}</option>)}
+            {(["faq","price","policy","delivery","hours","product"] as KnowledgeType[]).map(t => (
+              <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+            ))}
           </select>
           <input
-            value={newItem.question}
-            onChange={e => setNewItem(prev => ({ ...prev, question: e.target.value }))}
-            placeholder="Question or topic..."
+            value={newItem.title}
+            onChange={e => setNewItem(prev => ({ ...prev, title: e.target.value }))}
+            placeholder="Title or question..."
             className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
           <textarea
-            value={newItem.answer}
-            onChange={e => setNewItem(prev => ({ ...prev, answer: e.target.value }))}
+            value={newItem.content}
+            onChange={e => setNewItem(prev => ({ ...prev, content: e.target.value }))}
             placeholder="Answer or description..."
             rows={3}
             className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
           />
           <div className="flex justify-end gap-2">
             <button onClick={() => setShowAdd(false)} className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-accent transition-colors text-foreground">Cancel</button>
-            <button onClick={addItem} className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">Save</button>
+            <button onClick={addItem} className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">Save as Draft</button>
           </div>
         </div>
       )}
 
-      {/* Search + Category filters */}
+      {/* Search + Type filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -119,30 +145,31 @@ export function KnowledgeContent() {
             className="w-full pl-9 pr-4 py-2 text-sm bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
-        <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-1">
-          {CATEGORIES.map(cat => (
+        <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-1 flex-wrap">
+          {FILTER_TYPES.map(t => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={t}
+              onClick={() => setActiveType(t)}
               className={cn(
                 "px-3 py-1 text-xs rounded-md font-medium transition-all",
-                activeCategory === cat
+                activeType === t
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent"
               )}
             >
-              {cat}
+              {t === "all" ? "All" : TYPE_LABELS[t]}
             </button>
           ))}
         </div>
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total entries", value: items.length },
-          { label: "Verified", value: items.filter(i => i.verified).length },
-          { label: "Unverified", value: items.filter(i => !i.verified).length },
+          { label: "Total entries",  value: items.length },
+          { label: "Verified",       value: items.filter(i => i.status === "verified").length },
+          { label: "Needs review",   value: items.filter(i => i.status === "needs_review").length },
+          { label: "Draft",          value: items.filter(i => i.status === "draft").length },
         ].map(stat => (
           <div key={stat.label} className="bg-card border border-border rounded-xl px-4 py-3 text-center">
             <p className="text-2xl font-bold text-foreground">{stat.value}</p>
@@ -158,6 +185,7 @@ export function KnowledgeContent() {
         )}
         {filtered.map(item => {
           const isOpen = expanded === item.id
+          const isVerified = item.status === "verified"
           return (
             <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden">
               <div
@@ -166,21 +194,22 @@ export function KnowledgeContent() {
               >
                 <BookOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-foreground truncate">{item.question}</span>
-                    <span className={cn(
-                      "text-xs px-1.5 py-0.5 rounded-md font-medium flex-shrink-0",
-                      item.category === "FAQ" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
-                      item.category === "Price" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" :
-                      item.category === "Service" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                      "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-                    )}>{item.category}</span>
-                    {item.verified
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-medium text-foreground truncate">{item.title}</span>
+                    <span className={cn("text-xs px-1.5 py-0.5 rounded-md font-medium flex-shrink-0", TYPE_COLORS[item.type])}>
+                      {TYPE_LABELS[item.type]}
+                    </span>
+                    {isVerified
                       ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                      : <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                      : item.status === "needs_review"
+                        ? <AlertCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                        : <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                     }
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">Used {item.usageCount}x &middot; Updated {item.lastUpdated}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Used {item.usageCount}x &middot; Edited by {item.lastEditor} &middot;{" "}
+                    {item.languages.map(l => l.toUpperCase()).join(" · ")}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1">
                   {isOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
@@ -203,19 +232,19 @@ export function KnowledgeContent() {
                       </div>
                     </>
                   ) : (
-                    <p className="text-sm text-foreground leading-relaxed">{item.answer}</p>
+                    <p className="text-sm text-foreground leading-relaxed">{item.content}</p>
                   )}
                   <div className="flex items-center gap-2 pt-2 border-t border-border">
                     <button
                       onClick={() => toggleVerify(item.id)}
                       className={cn(
                         "flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors",
-                        item.verified
+                        isVerified
                           ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50"
                           : "bg-card border border-border text-muted-foreground hover:bg-accent"
                       )}
                     >
-                      <CheckCircle2 className="w-3 h-3" /> {item.verified ? "Verified" : "Mark verified"}
+                      <CheckCircle2 className="w-3 h-3" /> {isVerified ? "Verified" : "Mark verified"}
                     </button>
                     <button
                       onClick={() => startEdit(item)}
