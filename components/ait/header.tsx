@@ -14,15 +14,29 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useI18n, LOCALES, type Locale } from "@/lib/i18n"
-import { DEMO_USER, DEMO_ALERTS } from "@/lib/mock-data"
+import { DEMO_ALERTS } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { createClient } from "@/lib/supabase/client"
+import useSWR from "swr"
 
 const unreadAlerts = DEMO_ALERTS.filter((a) => !a.read)
+
+function useCurrentUser() {
+  const { data } = useSWR("supabase-user", async () => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    return user
+  })
+  return data
+}
 
 export function AitHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   const { t, locale, setLocale } = useI18n()
   const [notifOpen, setNotifOpen] = useState(false)
+  const user = useCurrentUser()
+  const displayName = user?.user_metadata?.full_name ?? user?.email ?? "User"
+  const avatarInitial = displayName.charAt(0).toUpperCase()
 
   return (
     <header className="flex items-center justify-between gap-4 mb-6">
@@ -115,17 +129,17 @@ export function AitHeader({ title, subtitle }: { title: string; subtitle?: strin
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-9 gap-2 px-2.5">
               <div className="w-6 h-6 rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center">
-                {DEMO_USER.avatar}
+                {avatarInitial}
               </div>
-              <span className="hidden sm:block text-xs font-medium max-w-[100px] truncate">{DEMO_USER.name}</span>
+              <span className="hidden sm:block text-xs font-medium max-w-[100px] truncate">{displayName}</span>
               <ChevronDown className="w-3 h-3 opacity-60" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuLabel className="font-normal">
               <div>
-                <p className="font-semibold text-sm truncate">{DEMO_USER.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{DEMO_USER.email}</p>
+                <p className="font-semibold text-sm truncate">{displayName}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email ?? ""}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

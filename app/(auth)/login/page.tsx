@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Zap, CheckCircle2, Shield, MessageSquare, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,29 +11,34 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useI18n, LOCALES, type Locale } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Loader2 } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
 export default function LoginPage() {
   const { t, locale, setLocale } = useI18n()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get("redirectTo") ?? "/"
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [remember, setRemember] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [isPending, startTransition] = useTransition()
 
-  async function handleLogin(e: React.FormEvent) {
+  function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError("")
-    setLoading(true)
-    await new Promise((r) => setTimeout(r, 1000))
-    // Demo: accept any email/password or specific demo credentials
-    if (!email || !password) {
-      setError(t("auth_invalid_credentials"))
-      setLoading(false)
-      return
-    }
-    router.push("/")
+
+    startTransition(async () => {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        setError(error.message)
+        return
+      }
+      router.push(redirectTo)
+      router.refresh()
+    })
   }
 
   function handleDemo() {
@@ -136,8 +141,9 @@ export default function LoginPage() {
               <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">{t("auth_remember_me")}</Label>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full bg-[#0F766E] hover:bg-[#0F766E]/90 text-white" disabled={loading}>
-              {loading ? t("auth_logging_in") : t("auth_login")}
+            <Button type="submit" className="w-full bg-[#0F766E] hover:bg-[#0F766E]/90 text-white" disabled={isPending}>
+              {isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
+              {isPending ? t("auth_logging_in") : t("auth_login")}
             </Button>
           </form>
 

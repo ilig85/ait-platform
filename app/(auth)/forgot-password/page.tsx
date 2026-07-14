@@ -1,25 +1,39 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import Link from "next/link"
-import { Zap } from "lucide-react"
+import { Zap, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useI18n } from "@/lib/i18n"
+import { createClient } from "@/lib/supabase/client"
 
 export default function ForgotPasswordPage() {
   const { t } = useI18n()
   const [email, setEmail] = useState("")
   const [sent, setSent] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [isPending, startTransition] = useTransition()
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
-    await new Promise((r) => setTimeout(r, 800))
-    setSent(true)
-    setLoading(false)
+    setError("")
+
+    startTransition(async () => {
+      const supabase = createClient()
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo:
+          process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL
+            ? `${process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL}?next=/update-password`
+            : `${window.location.origin}/auth/callback?next=/update-password`,
+      })
+      if (error) {
+        setError(error.message)
+        return
+      }
+      setSent(true)
+    })
   }
 
   return (
@@ -48,8 +62,10 @@ export default function ForgotPasswordPage() {
                 <Label htmlFor="email">{t("auth_email")}</Label>
                 <Input id="email" type="email" placeholder="name@business.kg" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
-              <Button type="submit" className="w-full bg-[#0F766E] hover:bg-[#0F766E]/90 text-white" disabled={loading}>
-                {loading ? "Sending..." : "Send reset link"}
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <Button type="submit" className="w-full bg-[#0F766E] hover:bg-[#0F766E]/90 text-white" disabled={isPending}>
+                {isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
+                {isPending ? "Sending…" : "Send reset link"}
               </Button>
               <Button variant="ghost" className="w-full" asChild>
                 <Link href="/login">{t("common_back")}</Link>

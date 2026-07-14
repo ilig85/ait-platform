@@ -1,0 +1,26 @@
+import Link from "next/link"
+import { AlertTriangle } from "lucide-react"
+
+export default function AuthErrorPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md text-center">
+        <div className="flex justify-center mb-4">
+          <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
+            <AlertTriangle className="w-7 h-7 text-destructive" />
+          </div>
+        </div>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Authentication error</h1>
+        <p className="text-muted-foreground mb-6 text-sm">
+          Something went wrong during sign in. The link may have expired or already been used.
+        </p>
+        <Link
+          href="/login"
+          className="inline-flex items-center justify-center px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+        >
+          Back to login
+        </Link>
+      </div>
+    </div>
+  )
+}
