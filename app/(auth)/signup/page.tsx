@@ -33,6 +33,8 @@ export default function SignupPage() {
         password,
         options: {
           data: { full_name: name },
+          emailRedirectTo:
+            "https://tasko-modern-task-management-3e.vercel.app/auth/callback?next=/login?confirmed=1",
         },
       })
       if (error) {
