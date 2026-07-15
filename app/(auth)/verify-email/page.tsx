@@ -113,11 +113,16 @@ export default function VerifyEmailPage() {
           </button>
         </div>
 
-        {/* Back to sign in */}
-        <p className="mt-4 text-sm text-muted-foreground">
-          <Link href="/login" className="text-primary font-medium hover:underline">
-            Back to sign in
-          </Link>
+        {/* Primary CTA after confirming */}
+        <Link
+          href="/login"
+          className="mt-6 flex w-full items-center justify-center rounded-lg bg-[#0F766E] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#0F766E]/90 transition-colors"
+        >
+          I confirmed my email &mdash; Sign in
+        </Link>
+
+        <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+          After clicking the confirmation link, return here and sign in. If you opened the link on another device, this page will not update automatically.
         </p>
       </div>
     </div>

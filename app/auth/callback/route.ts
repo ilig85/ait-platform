@@ -26,6 +26,13 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${safeNext}`)
     }
+    // For email-confirmation failures (expired / already-used link), redirect to
+    // login with a soft message instead of the generic error page.
+    if (type === "signup" || type === "email") {
+      return NextResponse.redirect(
+        `${origin}/login?message=email_confirmation_failed`
+      )
+    }
   }
 
   return NextResponse.redirect(`${origin}/auth/error`)

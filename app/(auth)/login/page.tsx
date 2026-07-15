@@ -21,6 +21,7 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get("redirectTo") ?? "/"
   const confirmed = searchParams.get("confirmed") === "1"
+  const confirmFailed = searchParams.get("message") === "email_confirmation_failed"
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [remember, setRemember] = useState(false)
@@ -144,7 +145,12 @@ function LoginForm() {
             </div>
             {confirmed && (
               <p className="text-sm text-[#0F766E] bg-[#0F766E]/10 rounded-md px-3 py-2">
-                Email confirmed. You can now sign in.
+                Email confirmed successfully. Sign in with your email and password to continue.
+              </p>
+            )}
+            {confirmFailed && (
+              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                Your email may already be confirmed. Try signing in. If that does not work, request a new confirmation email.
               </p>
             )}
             {error && <p className="text-sm text-destructive">{error}</p>}
