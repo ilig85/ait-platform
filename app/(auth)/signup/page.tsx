@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ChevronDown } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { getAuthCallbackUrl } from "@/lib/site-url"
 
 export default function SignupPage() {
   const { t, locale, setLocale } = useI18n()
@@ -27,14 +28,28 @@ export default function SignupPage() {
     setError("")
 
     startTransition(async () => {
+      let emailRedirectTo: string
+
+      try {
+        emailRedirectTo = getAuthCallbackUrl({
+          next: "/login?confirmed=1",
+        })
+      } catch (configurationError) {
+        setError(
+          configurationError instanceof Error
+            ? configurationError.message
+            : "Email confirmation is not configured correctly."
+        )
+        return
+      }
+
       const supabase = createClient()
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { full_name: name },
-          emailRedirectTo:
-            "https://tasko-modern-task-management-3e.vercel.app/login?confirmed=1",
+          emailRedirectTo,
         },
       })
       if (error) {
@@ -52,7 +67,7 @@ export default function SignupPage() {
         setError("An account with this email already exists. Please log in instead.")
         return
       }
-      // Store the email so /verify-email can show it and call verifyOtp.
+      // Store the email so /verify-email can show it and resend confirmation.
       // Never store the password here.
       sessionStorage.setItem("pending_verification_email", email)
       router.push("/verify-email")

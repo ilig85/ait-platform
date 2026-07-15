@@ -5,6 +5,7 @@ import { Zap, Loader2, Mail, RotateCcw } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
+import { getAuthCallbackUrl } from "@/lib/site-url"
 
 const RESEND_COOLDOWN = 60
 
@@ -34,10 +35,26 @@ export default function VerifyEmailPage() {
     setResent(false)
 
     startResend(async () => {
+      let emailRedirectTo: string
+
+      try {
+        emailRedirectTo = getAuthCallbackUrl({
+          next: "/login?confirmed=1",
+        })
+      } catch (configurationError) {
+        setError(
+          configurationError instanceof Error
+            ? configurationError.message
+            : "Email confirmation is not configured correctly."
+        )
+        return
+      }
+
       const supabase = createClient()
       const { error } = await supabase.auth.resend({
         type: "signup",
         email,
+        options: { emailRedirectTo },
       })
       if (error) {
         if (error.status === 429) {

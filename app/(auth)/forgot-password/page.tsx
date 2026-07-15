@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useI18n } from "@/lib/i18n"
 import { createClient } from "@/lib/supabase/client"
+import { getAuthCallbackUrl } from "@/lib/site-url"
 
 export default function ForgotPasswordPage() {
   const { t } = useI18n()
@@ -21,9 +22,22 @@ export default function ForgotPasswordPage() {
     setError("")
 
     startTransition(async () => {
+      let redirectTo: string
+
+      try {
+        redirectTo = getAuthCallbackUrl({ flow: "recovery" })
+      } catch (configurationError) {
+        setError(
+          configurationError instanceof Error
+            ? configurationError.message
+            : "Password recovery is not configured correctly."
+        )
+        return
+      }
+
       const supabase = createClient()
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+        redirectTo,
       })
       if (error) {
         setError(error.message)
@@ -45,7 +59,10 @@ export default function ForgotPasswordPage() {
         {sent ? (
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-2">Check your email</h1>
-            <p className="text-muted-foreground text-sm mb-6">If that email exists, we sent a password reset link.</p>
+            <p className="text-muted-foreground text-sm mb-3">If that email exists, we sent a password reset link.</p>
+            <p className="text-muted-foreground text-xs mb-6">
+              Open the link in this same browser and device. To reset on another device, request a new link from that device first.
+            </p>
             <Button variant="outline" className="w-full" asChild>
               <Link href="/login">{t("auth_login")}</Link>
             </Button>

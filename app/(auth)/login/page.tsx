@@ -13,13 +13,14 @@ import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ChevronDown, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { sanitizeRedirectPath } from "@/lib/site-url"
 
 // Wrap the actual form in its own component so useSearchParams() is inside a Suspense boundary
 function LoginForm() {
   const { t, locale, setLocale } = useI18n()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirectTo") ?? "/"
+  const redirectTo = sanitizeRedirectPath(searchParams.get("redirectTo"), "/")
   const confirmed = searchParams.get("confirmed") === "1"
   const confirmFailed = searchParams.get("message") === "email_confirmation_failed"
   const [email, setEmail] = useState("")
