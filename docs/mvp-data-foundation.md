@@ -90,6 +90,25 @@ The script is transactional and idempotent:
 
 Do not put this backfill file in the migrations directory and do not run it before the schema and provisioning trigger have been reviewed.
 
+## Running the SQL Editor RLS security test
+
+Run `supabase/tests/20260715_rls_isolation_test.sql` only in the disposable Supabase project after all four migrations and the existing-user backfill have succeeded. The project must contain exactly these two Auth users and no others:
+
+```text
+ilgize7+ait-old-test@gmail.com
+ilgize7+ait-new-test@gmail.com
+```
+
+Open the disposable project's Dashboard SQL Editor, paste the complete test file, and run it as one script. No user password, API key, service-role key, or database credential is needed. The script stops before creating fixtures if either required user is missing, if any non-test Auth user exists, or if the users already share an organization.
+
+The test creates isolated tenant fixtures inside a transaction, impersonates the `anon` and `authenticated` PostgreSQL roles with transaction-local JWT claims, and raises an error at the first failed security assertion. Success is exactly:
+
+```text
+AIT RLS ISOLATION TEST PASSED: all security assertions succeeded; all test records will be rolled back.
+```
+
+The final statement is `rollback`, so organizations, memberships, channels, contacts, conversations, messages, consent, and templates created by the test do not persist. The script never updates or deletes either Auth user. Do not weaken or remove the Auth-user safety guard, and never run this test against production.
+
 ## Applying later
 
 Nothing in this phase has been applied remotely. Before applying:
