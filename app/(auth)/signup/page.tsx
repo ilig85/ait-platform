@@ -28,15 +28,21 @@ export default function SignupPage() {
 
     startTransition(async () => {
       const supabase = createClient()
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { full_name: name },
+          emailRedirectTo:
+            "https://tasko-modern-task-management-3e.vercel.app/login?confirmed=1",
         },
       })
       if (error) {
-        setError(error.message)
+        if (error.status === 429) {
+          setError("Too many signup emails were requested. Please wait about one hour and try again.")
+        } else {
+          setError(error.message)
+        }
         return
       }
       // Supabase returns success (error: null) for existing emails ("user_repeated_signup").

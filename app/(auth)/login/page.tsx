@@ -20,6 +20,8 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get("redirectTo") ?? "/"
+  const confirmed = searchParams.get("confirmed") === "1"
+  const confirmFailed = searchParams.get("message") === "email_confirmation_failed"
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [remember, setRemember] = useState(false)
@@ -141,6 +143,16 @@ function LoginForm() {
               <Checkbox id="remember" checked={remember} onCheckedChange={(v) => setRemember(!!v)} />
               <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">{t("auth_remember_me")}</Label>
             </div>
+            {confirmed && (
+              <p className="text-sm text-[#0F766E] bg-[#0F766E]/10 rounded-md px-3 py-2">
+                Email confirmed successfully. Sign in with your email and password to continue.
+              </p>
+            )}
+            {confirmFailed && (
+              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                Your email may already be confirmed. Try signing in. If that does not work, request a new confirmation email.
+              </p>
+            )}
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="w-full bg-[#0F766E] hover:bg-[#0F766E]/90 text-white" disabled={isPending}>
               {isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
