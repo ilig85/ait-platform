@@ -1,5 +1,3 @@
-"use client"
-
 import { AppShell } from "@/components/ait/app-shell"
 import { KnowledgeContent } from "@/components/knowledge/knowledge-content"
 
