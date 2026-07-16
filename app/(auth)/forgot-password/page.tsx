@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
-import { Zap, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import { AitLogo } from "@/components/brand/ait-logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,10 +38,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-[#0F766E] flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-xl text-[#15253D]">AIT</span>
+          <AitLogo variant="wordmark" theme="light" size="md" label="AIT" />
         </div>
         {sent ? (
           <div className="text-center">
@@ -60,7 +58,7 @@ export default function ForgotPasswordPage() {
                 <Input id="email" type="email" placeholder="name@business.kg" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full bg-[#0F766E] hover:bg-[#0F766E]/90 text-white" disabled={isPending}>
+              <Button type="submit" className="w-full bg-[#2DE2B1] hover:bg-[#25c99e] text-[#071A1B] font-semibold" disabled={isPending}>
                 {isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
                 {isPending ? "Sending…" : "Send reset link"}
               </Button>

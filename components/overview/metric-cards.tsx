@@ -1,79 +1,78 @@
 "use client"
 
 import Link from "next/link"
-import { AlertCircle, CheckCircle2, Info, MessageSquare, Users } from "lucide-react"
-import { Card } from "@/components/ui/card"
+import { AlertCircle, CheckCircle2, MessageSquare, Users } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { OverviewData } from "@/lib/data/models"
 import { cn } from "@/lib/utils"
 
-export function MetricCards({ metrics }: { metrics: OverviewData["metrics"] }) {
-  const items = [
-    {
-      label: "Contacts",
-      value: metrics.contacts,
-      icon: Users,
-      href: "/customers",
-      color: "text-[#0F766E]",
-      bg: "bg-[#0F766E]/10",
-      tooltip: "All contacts stored for the selected organization.",
-    },
-    {
-      label: "Resolved conversations",
-      value: metrics.resolvedConversations,
-      icon: CheckCircle2,
-      href: "/inbox?filter=resolved",
-      color: "text-[#0F766E]",
-      bg: "bg-[#0F766E]/10",
-      tooltip: "Conversations whose current database status is resolved.",
-    },
-    {
-      label: "Open conversations",
-      value: metrics.openConversations,
-      icon: MessageSquare,
-      href: "/inbox?filter=open",
-      color: "text-amber-600",
-      bg: "bg-amber-50",
-      tooltip: "Conversations whose current status is open or pending.",
-    },
-    {
-      label: "Needs human",
-      value: metrics.needsHuman,
-      icon: AlertCircle,
-      href: "/inbox?filter=needs_human",
-      color: "text-destructive",
-      bg: "bg-destructive/10",
-      tooltip: "Conversations currently marked as needing human attention.",
-    },
-  ]
+const ITEMS = [
+  {
+    label: "Contacts",
+    key: "contacts" as const,
+    icon: Users,
+    href: "/customers",
+    accent: "#2DE2B1",
+    tooltip: "All contacts stored for the selected organization.",
+  },
+  {
+    label: "Resolved",
+    key: "resolvedConversations" as const,
+    icon: CheckCircle2,
+    href: "/inbox?filter=resolved",
+    accent: "#2DE2B1",
+    tooltip: "Conversations whose current database status is resolved.",
+  },
+  {
+    label: "Open",
+    key: "openConversations" as const,
+    icon: MessageSquare,
+    href: "/inbox?filter=open",
+    accent: "#67D9FF",
+    tooltip: "Conversations whose current status is open or pending.",
+  },
+  {
+    label: "Needs human",
+    key: "needsHuman" as const,
+    icon: AlertCircle,
+    href: "/inbox?filter=needs_human",
+    accent: "#FF6B6B",
+    tooltip: "Conversations currently marked as needing human attention.",
+  },
+]
 
+export function MetricCards({ metrics }: { metrics: OverviewData["metrics"] }) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-      {items.map((item) => {
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger-children">
+      {ITEMS.map((item) => {
         const Icon = item.icon
+        const value = metrics[item.key]
         return (
-          <Link key={item.label} href={item.href}>
-            <Card className="p-4 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer group border-border/60">
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0", item.bg)}>
-                  <Icon className={cn("w-4 h-4", item.color)} />
+          <Tooltip key={item.label}>
+            <TooltipTrigger asChild>
+              <Link href={item.href} className="block group">
+                <div
+                  className={cn(
+                    "bg-card border border-border/60 rounded-xl p-4",
+                    "hover:shadow-md hover:-translate-y-0.5 transition-all duration-200",
+                    "flex flex-col gap-3",
+                  )}
+                >
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: `${item.accent}18` }}
+                  >
+                    <Icon className="w-4 h-4" style={{ color: item.accent }} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold text-foreground tabular-nums">{value}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{item.label}</p>
+                  </div>
                 </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors mt-0.5" aria-label={`About ${item.label}`}>
-                      <Info className="w-3.5 h-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[220px] text-xs">{item.tooltip}</TooltipContent>
-                </Tooltip>
-              </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-foreground">{item.value}</p>
-                <p className="text-xs text-muted-foreground leading-snug">{item.label}</p>
-                <p className="text-[10px] text-muted-foreground">Current database total</p>
-              </div>
-            </Card>
-          </Link>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[220px] text-xs">{item.tooltip}</TooltipContent>
+          </Tooltip>
         )
       })}
     </div>

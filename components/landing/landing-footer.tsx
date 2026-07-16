@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Zap } from "lucide-react"
+import { AitLogo } from "@/components/brand/ait-logo"
 
 const links = [
   {
@@ -53,13 +53,7 @@ export function LandingFooter() {
               className="inline-flex items-center gap-2.5 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DE2B1] rounded-md"
               aria-label="AIT home"
             >
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: "#2DE2B1" }}
-              >
-                <Zap className="w-4 h-4" style={{ color: "#071A1B" }} aria-hidden="true" />
-              </div>
-              <span className="text-lg font-bold" style={{ color: "#F6F5EF" }}>AIT</span>
+              <AitLogo variant="wordmark" theme="sidebar" size="sm" label="AIT" />
             </Link>
             <p
               className="text-sm leading-relaxed"

@@ -31,75 +31,88 @@
   --ait-warning: #D97706;
   --ait-success: #0F766E;
 
-  /* shadcn tokens mapped to AIT palette */
-  --background: oklch(0.978 0.008 78);
-  --foreground: oklch(0.14 0.03 240);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.14 0.03 240);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.14 0.03 240);
-  --primary: oklch(0.35 0.07 199);
-  --primary-foreground: oklch(0.98 0.005 199);
-  --secondary: oklch(0.95 0.01 78);
-  --secondary-foreground: oklch(0.14 0.03 240);
-  --muted: oklch(0.95 0.01 78);
-  --muted-foreground: oklch(0.48 0.03 240);
-  --accent: oklch(0.46 0.1 178);
-  --accent-foreground: oklch(0.98 0.005 178);
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 0);
-  --border: oklch(0.9 0.01 220);
-  --input: oklch(0.9 0.01 220);
-  --ring: oklch(0.46 0.1 178);
-  --chart-1: oklch(0.46 0.1 178);
-  --chart-2: oklch(0.73 0.14 74);
-  --chart-3: oklch(0.35 0.07 199);
-  --chart-4: oklch(0.65 0.08 240);
-  --chart-5: oklch(0.78 0.06 110);
-  --radius: 0.875rem;
-  --sidebar: oklch(0.14 0.05 228);
-  --sidebar-foreground: oklch(0.92 0.01 220);
-  --sidebar-primary: oklch(0.46 0.1 178);
-  --sidebar-primary-foreground: oklch(0.98 0.005 178);
-  --sidebar-accent: oklch(0.2 0.05 228);
-  --sidebar-accent-foreground: oklch(0.92 0.01 220);
-  --sidebar-border: oklch(0.22 0.04 228);
-  --sidebar-ring: oklch(0.46 0.1 178);
+  /* Signal brand — light mode (default, app runs in light mode) */
+  /* #F6F5EF warm cloud bg, #FFFFFF cards, #102223 main text */
+  /* #071A1B sidebar, #0D292A elevated dark, #2DE2B1 mint accent, #67D9FF sky, #FF6B6B coral */
+  --background: #F6F5EF;
+  --foreground: #102223;
+  --card: #FFFFFF;
+  --card-foreground: #102223;
+  --popover: #FFFFFF;
+  --popover-foreground: #102223;
+  /* primary = mint accent */
+  --primary: #2DE2B1;
+  --primary-foreground: #071A1B;
+  --secondary: #EAE9E3;
+  --secondary-foreground: #102223;
+  --muted: #EAE9E3;
+  --muted-foreground: #5A6B6C;
+  /* accent = sky */
+  --accent: #67D9FF;
+  --accent-foreground: #071A1B;
+  --destructive: #FF6B6B;
+  --destructive-foreground: #FFFFFF;
+  --border: #D8D7D1;
+  --input: #D8D7D1;
+  --ring: #2DE2B1;
+  /* charts */
+  --chart-1: #2DE2B1;
+  --chart-2: #67D9FF;
+  --chart-3: #0D292A;
+  --chart-4: #5A6B6C;
+  --chart-5: #FF6B6B;
+  --radius: 0.5rem;
+  /* sidebar = deep-ink */
+  --sidebar: #071A1B;
+  --sidebar-foreground: #C8D8D9;
+  --sidebar-primary: #2DE2B1;
+  --sidebar-primary-foreground: #071A1B;
+  --sidebar-accent: #0D292A;
+  --sidebar-accent-foreground: #E8F4F5;
+  --sidebar-border: rgba(45, 226, 177, 0.10);
+  --sidebar-ring: #2DE2B1;
+  /* signal semantic */
+  --signal-mint: #2DE2B1;
+  --signal-sky: #67D9FF;
+  --signal-coral: #FF6B6B;
+  --signal-deep: #071A1B;
+  --signal-forest: #0D292A;
 }
 
 .dark {
-  --background: oklch(0.12 0.02 228);
-  --foreground: oklch(0.94 0.01 220);
-  --card: oklch(0.16 0.03 228);
-  --card-foreground: oklch(0.94 0.01 220);
-  --popover: oklch(0.16 0.03 228);
-  --popover-foreground: oklch(0.94 0.01 220);
-  --primary: oklch(0.46 0.1 178);
-  --primary-foreground: oklch(0.98 0.005 178);
-  --secondary: oklch(0.2 0.03 228);
-  --secondary-foreground: oklch(0.94 0.01 220);
-  --muted: oklch(0.2 0.03 228);
-  --muted-foreground: oklch(0.6 0.02 220);
-  --accent: oklch(0.46 0.1 178);
-  --accent-foreground: oklch(0.98 0.005 178);
-  --destructive: oklch(0.5 0.2 25);
-  --destructive-foreground: oklch(0.98 0.01 0);
-  --border: oklch(0.25 0.03 228);
-  --input: oklch(0.25 0.03 228);
-  --ring: oklch(0.46 0.1 178);
-  --chart-1: oklch(0.46 0.1 178);
-  --chart-2: oklch(0.73 0.14 74);
-  --chart-3: oklch(0.55 0.08 199);
-  --chart-4: oklch(0.65 0.08 240);
-  --chart-5: oklch(0.78 0.06 110);
-  --sidebar: oklch(0.1 0.04 228);
-  --sidebar-foreground: oklch(0.92 0.01 220);
-  --sidebar-primary: oklch(0.46 0.1 178);
-  --sidebar-primary-foreground: oklch(0.98 0.005 178);
-  --sidebar-accent: oklch(0.18 0.04 228);
-  --sidebar-accent-foreground: oklch(0.92 0.01 220);
-  --sidebar-border: oklch(0.2 0.03 228);
-  --sidebar-ring: oklch(0.46 0.1 178);
+  /* Dark mode — invert surface, keep Signal accents */
+  --background: #0D1A1B;
+  --foreground: #E8F0F1;
+  --card: #0D292A;
+  --card-foreground: #E8F0F1;
+  --popover: #0D292A;
+  --popover-foreground: #E8F0F1;
+  --primary: #2DE2B1;
+  --primary-foreground: #071A1B;
+  --secondary: #132728;
+  --secondary-foreground: #C8D8D9;
+  --muted: #132728;
+  --muted-foreground: #6A8A8C;
+  --accent: #67D9FF;
+  --accent-foreground: #071A1B;
+  --destructive: #FF6B6B;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(200, 216, 217, 0.12);
+  --input: rgba(200, 216, 217, 0.12);
+  --ring: #2DE2B1;
+  --chart-1: #2DE2B1;
+  --chart-2: #67D9FF;
+  --chart-3: #C8D8D9;
+  --chart-4: #6A8A8C;
+  --chart-5: #FF6B6B;
+  --sidebar: #071A1B;
+  --sidebar-foreground: #C8D8D9;
+  --sidebar-primary: #2DE2B1;
+  --sidebar-primary-foreground: #071A1B;
+  --sidebar-accent: #0D292A;
+  --sidebar-accent-foreground: #E8F4F5;
+  --sidebar-border: rgba(45, 226, 177, 0.10);
+  --sidebar-ring: #2DE2B1;
 }
 
 @theme inline {
@@ -166,9 +179,49 @@
   100% { transform: translateX(100%); }
 }
 
-.animate-slide-in-up { animation: slideInUp 0.4s ease-out forwards; }
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-in-up { animation: slideInUp 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
 .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
 .animate-shimmer { animation: shimmer 1.5s ease-in-out infinite; }
+.animate-card-enter { animation: card-enter 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+/* Staggered card children */
+.stagger-children > * { opacity: 0; animation: card-enter 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+
+/* Reduced-motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in-up,
+  .animate-fade-in,
+  .animate-card-enter,
+  .stagger-children > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Scrollbar tweaks for sidebar / conversation panels */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Signal skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--muted) 0%, color-mix(in srgb, var(--muted) 70%, transparent) 50%, var(--muted) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--muted); }
+}
 
 /* Landing page animations */
 @keyframes land-fade-up {
