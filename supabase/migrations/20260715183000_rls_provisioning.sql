@@ -52,13 +52,13 @@ as $$
 $$;
 
 revoke all on function public.ait_is_organization_member(uuid)
-  from public, anon;
+  from public, anon, authenticated;
 revoke all on function public.ait_has_organization_role(
   uuid,
   public.organization_member_role[]
-) from public, anon;
+) from public, anon, authenticated;
 revoke all on function public.ait_users_share_organization(uuid)
-  from public, anon;
+  from public, anon, authenticated;
 
 grant execute on function public.ait_is_organization_member(uuid)
   to authenticated;
@@ -68,6 +68,25 @@ grant execute on function public.ait_has_organization_role(
 ) to authenticated;
 grant execute on function public.ait_users_share_organization(uuid)
   to authenticated;
+
+-- Replace the v0 preference policies. Preferences are provisioned by the Auth
+-- trigger, so browser users need only read and update their own mutable fields.
+drop policy if exists prefs_select_own on public.user_preferences;
+drop policy if exists prefs_insert_own on public.user_preferences;
+drop policy if exists prefs_update_own on public.user_preferences;
+
+create policy user_preferences_select_self
+on public.user_preferences
+for select
+to authenticated
+using (user_id = auth.uid());
+
+create policy user_preferences_update_self
+on public.user_preferences
+for update
+to authenticated
+using (user_id = auth.uid())
+with check (user_id = auth.uid());
 
 -- Profiles are visible only to the user or to users sharing an organization.
 create policy profiles_select_same_organization
@@ -343,8 +362,13 @@ to authenticated
 using (public.ait_is_organization_member(organization_id));
 
 -- Browser table and column privileges. RLS remains the tenant authorization boundary.
-grant select on table public.profiles to authenticated;
+grant select (id, full_name, avatar_url, created_at, updated_at)
+  on table public.profiles to authenticated;
 grant update (full_name) on table public.profiles to authenticated;
+
+grant select on table public.user_preferences to authenticated;
+grant update (locale, theme, notifications_enabled)
+  on table public.user_preferences to authenticated;
 
 grant select on table public.organizations to authenticated;
 grant update (name, default_language, timezone)
@@ -428,62 +452,32 @@ $$;
 revoke all on function public.ait_ensure_organization_has_owner()
   from public, anon, authenticated;
 
+do $$
+begin
+  if exists (
+    select 1
+    from public.organizations as organization
+    where not exists (
+      select 1
+      from public.organization_members as membership
+      where membership.organization_id = organization.id
+        and membership.role = 'owner'
+    )
+  ) then
+    raise exception using
+      errcode = '23514',
+      message = 'cannot enable final-owner enforcement while an organization has no owner';
+  end if;
+end;
+$$;
+
+drop trigger if exists organization_members_require_owner
+  on public.organization_members;
+
 create constraint trigger organization_members_require_owner
 after delete or update on public.organization_members
 deferrable initially deferred
 for each row execute function public.ait_ensure_organization_has_owner();
-
--- Future auth.users inserts provision all three rows in the same transaction.
-create or replace function public.ait_provision_new_auth_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  new_organization_id uuid;
-  profile_full_name text;
-  organization_name text;
-begin
-  profile_full_name := nullif(
-    left(btrim(coalesce(new.raw_user_meta_data ->> 'full_name', '')), 200),
-    ''
-  );
-
-  organization_name := coalesce(
-    left(profile_full_name || '''s Organization', 200),
-    'My Organization'
-  );
-
-  insert into public.profiles (id, full_name)
-  values (new.id, profile_full_name);
-
-  insert into public.organizations (name, created_by)
-  values (organization_name, new.id)
-  returning id into new_organization_id;
-
-  insert into public.organization_members (
-    organization_id,
-    user_id,
-    role
-  ) values (
-    new_organization_id,
-    new.id,
-    'owner'
-  );
-
-  return new;
-end;
-$$;
-
-revoke all on function public.ait_provision_new_auth_user()
-  from public, anon, authenticated;
-
-drop trigger if exists ait_provision_new_auth_user on auth.users;
-
-create trigger ait_provision_new_auth_user
-after insert on auth.users
-for each row execute function public.ait_provision_new_auth_user();
 
 comment on function public.ait_is_organization_member(uuid) is
   'Non-recursive RLS helper that checks the calling auth user only.';
@@ -492,4 +486,4 @@ comment on function public.ait_has_organization_role(
   public.organization_member_role[]
 ) is 'Non-recursive RLS helper that checks the calling auth user only.';
 comment on function public.ait_provision_new_auth_user() is
-  'Atomically creates a profile, default organization, and owner membership for a new auth user.';
+  'Atomically creates a profile, preferences, default organization, and owner membership for a new auth user.';

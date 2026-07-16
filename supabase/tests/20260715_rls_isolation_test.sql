@@ -138,10 +138,20 @@ begin
   perform set_config('ait.rls_test.template_a_id', template_a_id::text, true);
   perform set_config('ait.rls_test.template_b_id', template_b_id::text, true);
 
-  insert into public.organizations (id, name, created_by)
+  insert into public.organizations (id, name, slug, created_by)
   values
-    (organization_a_id, 'AIT RLS Test Organization A', user_a_id),
-    (organization_b_id, 'AIT RLS Test Organization B', user_b_id);
+    (
+      organization_a_id,
+      'AIT RLS Test Organization A',
+      'ait-rls-a-' || left(replace(organization_a_id::text, '-', ''), 16),
+      user_a_id
+    ),
+    (
+      organization_b_id,
+      'AIT RLS Test Organization B',
+      'ait-rls-b-' || left(replace(organization_b_id::text, '-', ''), 16),
+      user_b_id
+    );
 
   insert into public.organization_members (organization_id, user_id, role)
   values
@@ -391,6 +401,7 @@ declare
 begin
   foreach table_name in array array[
     'profiles',
+    'user_preferences',
     'organizations',
     'organization_members',
     'channel_connections',
@@ -475,6 +486,9 @@ begin
   end if;
 
   if not exists (select 1 from public.profiles where id = user_a_id)
+    or not exists (
+      select 1 from public.user_preferences where user_id = user_a_id
+    )
     or not exists (select 1 from public.organizations where id = organization_a_id)
     or not exists (
       select 1
@@ -499,6 +513,9 @@ begin
   end if;
 
   if exists (select 1 from public.profiles where id = user_b_id)
+    or exists (
+      select 1 from public.user_preferences where user_id = user_b_id
+    )
     or exists (select 1 from public.organizations where id = organization_b_id)
     or exists (
       select 1
@@ -573,6 +590,9 @@ begin
   end if;
 
   if not exists (select 1 from public.profiles where id = user_b_id)
+    or not exists (
+      select 1 from public.user_preferences where user_id = user_b_id
+    )
     or not exists (select 1 from public.organizations where id = organization_b_id)
     or not exists (
       select 1
@@ -597,6 +617,9 @@ begin
   end if;
 
   if exists (select 1 from public.profiles where id = user_a_id)
+    or exists (
+      select 1 from public.user_preferences where user_id = user_a_id
+    )
     or exists (select 1 from public.organizations where id = organization_a_id)
     or exists (
       select 1
@@ -664,6 +687,26 @@ declare
   blocked boolean;
   affected_rows integer;
 begin
+  update public.user_preferences
+  set notifications_enabled = not notifications_enabled
+  where user_id = user_a_id;
+
+  get diagnostics affected_rows = row_count;
+
+  if affected_rows <> 1 then
+    raise exception 'RLS TEST FAILED: User A could not update their own preferences';
+  end if;
+
+  update public.user_preferences
+  set notifications_enabled = not notifications_enabled
+  where user_id = current_setting('ait.rls_test.user_b_id')::uuid;
+
+  get diagnostics affected_rows = row_count;
+
+  if affected_rows <> 0 then
+    raise exception 'RLS TEST FAILED: User A updated User B preferences';
+  end if;
+
   -- Owners/managers may enqueue only a human outbound message in pending state.
   insert into public.messages (
     id,
@@ -1030,8 +1073,13 @@ begin
   perform set_config('ait.rls_test.member_contact_id', member_contact_id::text, true);
   perform set_config('ait.rls_test.member_conversation_id', member_conversation_id::text, true);
 
-  insert into public.organizations (id, name, created_by)
-  values (member_organization_id, 'AIT RLS Member-Role Test', user_b_id);
+  insert into public.organizations (id, name, slug, created_by)
+  values (
+    member_organization_id,
+    'AIT RLS Member-Role Test',
+    'ait-rls-member-' || left(replace(member_organization_id::text, '-', ''), 16),
+    user_b_id
+  );
 
   insert into public.organization_members (organization_id, user_id, role)
   values
