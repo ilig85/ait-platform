@@ -61,7 +61,7 @@ declare
   ];
   actual_policies text[];
   actual_updated_at_triggers text[];
-  table_name text;
+  application_table_name text;
   privilege_name text;
   test_user record;
   noninternal_auth_trigger_count integer;
@@ -154,66 +154,66 @@ begin
 
   if not exists (
     select 1
-    from information_schema.columns
-    where table_schema = 'public'
-      and table_name = 'profiles'
-      and column_name = 'email'
-      and data_type = 'text'
+    from information_schema.columns as c
+    where c.table_schema = 'public'
+      and c.table_name = 'profiles'
+      and c.column_name = 'email'
+      and c.data_type = 'text'
   ) or not exists (
     select 1
-    from information_schema.columns
-    where table_schema = 'public'
-      and table_name = 'profiles'
-      and column_name = 'avatar_url'
-      and data_type = 'text'
+    from information_schema.columns as c
+    where c.table_schema = 'public'
+      and c.table_name = 'profiles'
+      and c.column_name = 'avatar_url'
+      and c.data_type = 'text'
   ) or not exists (
     select 1
-    from information_schema.columns
-    where table_schema = 'public'
-      and table_name = 'organizations'
-      and column_name = 'slug'
-      and is_nullable = 'NO'
+    from information_schema.columns as c
+    where c.table_schema = 'public'
+      and c.table_name = 'organizations'
+      and c.column_name = 'slug'
+      and c.is_nullable = 'NO'
   ) or not exists (
     select 1
-    from information_schema.columns
-    where table_schema = 'public'
-      and table_name = 'organizations'
-      and column_name = 'plan'
-      and is_nullable = 'NO'
+    from information_schema.columns as c
+    where c.table_schema = 'public'
+      and c.table_name = 'organizations'
+      and c.column_name = 'plan'
+      and c.is_nullable = 'NO'
   ) or not exists (
     select 1
-    from information_schema.columns
-    where table_schema = 'public'
-      and table_name = 'organization_members'
-      and column_name = 'id'
-      and data_type = 'uuid'
+    from information_schema.columns as c
+    where c.table_schema = 'public'
+      and c.table_name = 'organization_members'
+      and c.column_name = 'id'
+      and c.data_type = 'uuid'
   ) or not exists (
     select 1
-    from information_schema.columns
-    where table_schema = 'public'
-      and table_name = 'organization_members'
-      and column_name = 'joined_at'
-      and is_nullable = 'NO'
+    from information_schema.columns as c
+    where c.table_schema = 'public'
+      and c.table_name = 'organization_members'
+      and c.column_name = 'joined_at'
+      and c.is_nullable = 'NO'
   ) or not exists (
     select 1
-    from information_schema.columns
-    where table_schema = 'public'
-      and table_name = 'organization_members'
-      and column_name = 'created_at'
-      and is_nullable = 'NO'
+    from information_schema.columns as c
+    where c.table_schema = 'public'
+      and c.table_name = 'organization_members'
+      and c.column_name = 'created_at'
+      and c.is_nullable = 'NO'
   ) then
     raise exception 'RECONCILIATION TEST FAILED: a required compatibility column is missing or changed';
   end if;
 
   if not exists (
     select 1
-    from information_schema.columns
-    where table_schema = 'public'
-      and table_name = 'organization_members'
-      and column_name = 'role'
-      and data_type = 'USER-DEFINED'
-      and udt_schema = 'public'
-      and udt_name = 'organization_member_role'
+    from information_schema.columns as c
+    where c.table_schema = 'public'
+      and c.table_name = 'organization_members'
+      and c.column_name = 'role'
+      and c.data_type = 'USER-DEFINED'
+      and c.udt_schema = 'public'
+      and c.udt_name = 'organization_member_role'
   ) then
     raise exception 'RECONCILIATION TEST FAILED: membership role is not the target enum';
   end if;
@@ -342,7 +342,7 @@ begin
     raise exception 'RECONCILIATION TEST FAILED: final policy set does not exactly replace the legacy policies';
   end if;
 
-  foreach table_name in array application_tables
+  foreach application_table_name in array application_tables
   loop
     if not exists (
       select 1
@@ -350,10 +350,10 @@ begin
       join pg_catalog.pg_namespace as schema_record
         on schema_record.oid = table_record.relnamespace
       where schema_record.nspname = 'public'
-        and table_record.relname = table_name
+        and table_record.relname = application_table_name
         and table_record.relrowsecurity
     ) then
-      raise exception 'RECONCILIATION TEST FAILED: RLS is not enabled on public.%', table_name;
+      raise exception 'RECONCILIATION TEST FAILED: RLS is not enabled on public.%', application_table_name;
     end if;
 
     foreach privilege_name in array array[
@@ -362,10 +362,10 @@ begin
     loop
       if has_table_privilege(
         'anon',
-        format('public.%I', table_name),
+        format('public.%I', application_table_name),
         privilege_name
       ) then
-        raise exception 'RECONCILIATION TEST FAILED: anon retains % on public.%', privilege_name, table_name;
+        raise exception 'RECONCILIATION TEST FAILED: anon retains % on public.%', privilege_name, application_table_name;
       end if;
     end loop;
   end loop;
