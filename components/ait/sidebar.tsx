@@ -24,7 +24,7 @@ import { useShellData } from "@/components/ait/shell-context"
 import { cn } from "@/lib/utils"
 
 const NAV_ITEMS = [
-  { href: "/", labelKey: "nav_overview" as const, icon: LayoutDashboard },
+  { href: "/dashboard", labelKey: "nav_overview" as const, icon: LayoutDashboard },
   { href: "/inbox", labelKey: "nav_inbox" as const, icon: MessageSquare, showUnread: true },
   { href: "/ai-tasks", labelKey: "nav_ai_tasks" as const, icon: Sparkles },
   { href: "/customers", labelKey: "nav_customers" as const, icon: Users },
@@ -65,7 +65,7 @@ export function AitSidebar() {
       <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden">
         <div className="space-y-0.5 px-2">
           {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
             const Icon = item.icon
             const badge = item.showUnread ? unreadConversationCount : 0
             return (

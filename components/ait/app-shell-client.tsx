@@ -28,7 +28,7 @@ import type { ShellData } from "@/lib/data/models"
 import { cn } from "@/lib/utils"
 
 const NAV_ITEMS = [
-  { href: "/", labelKey: "nav_overview" as const, icon: LayoutDashboard },
+  { href: "/dashboard", labelKey: "nav_overview" as const, icon: LayoutDashboard },
   { href: "/inbox", labelKey: "nav_inbox" as const, icon: MessageSquare, showUnread: true },
   { href: "/ai-tasks", labelKey: "nav_ai_tasks" as const, icon: Sparkles },
   { href: "/customers", labelKey: "nav_customers" as const, icon: Users },
@@ -96,7 +96,7 @@ function MobileNav() {
             </div>
             <nav className="py-4 px-2 space-y-0.5">
               {NAV_ITEMS.map((item) => {
-                const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
+                const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
                 const Icon = item.icon
                 const badge = item.showUnread ? unreadConversationCount : 0
                 return (

@@ -38,7 +38,7 @@ export default function LogoutPage() {
         <p className="text-sm text-muted-foreground mb-6">{t("auth_logout_confirm_desc")}</p>
         <div className="flex gap-3">
           <Button variant="outline" className="flex-1" asChild>
-            <Link href="/">{t("common_cancel")}</Link>
+            <Link href="/dashboard">{t("common_cancel")}</Link>
           </Button>
           <Button
             onClick={handleLogout}

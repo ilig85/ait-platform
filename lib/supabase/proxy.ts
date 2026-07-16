@@ -35,6 +35,7 @@ export async function updateSession(request: NextRequest) {
 
   // All routes that must be reachable while logged out
   const isPublicRoute =
+    pathname === "/" ||
     pathname === "/login" ||
     pathname === "/signup" ||
     pathname === "/forgot-password" ||
@@ -55,7 +56,7 @@ export async function updateSession(request: NextRequest) {
   // /update-password, /forgot-password (they may need those even while logged in)
   if (user && (pathname === "/login" || pathname === "/signup")) {
     const url = request.nextUrl.clone()
-    url.pathname = "/"
+    url.pathname = "/dashboard"
     return NextResponse.redirect(url)
   }
 
