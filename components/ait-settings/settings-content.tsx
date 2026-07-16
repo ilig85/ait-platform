@@ -1,7 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { Building2, Clock, Globe, Users, BrainCircuit, Smartphone, Save, CheckCircle2 } from "lucide-react"
+import {
+  BrainCircuit,
+  Building2,
+  CheckCircle2,
+  Clock,
+  Globe,
+  Info,
+  Smartphone,
+  Users,
+  XCircle,
+} from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import type { SettingsData } from "@/lib/data/models"
 import { cn } from "@/lib/utils"
 
 const TABS = [
@@ -11,287 +24,170 @@ const TABS = [
   { id: "channel", label: "Channel", icon: Smartphone },
 ] as const
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-const LANGUAGES = ["English", "Russian", "Kyrgyz"]
-
-export function AitSettingsContent() {
-  const [tab, setTab] = useState<string>("business")
-  const [saved, setSaved] = useState(false)
-  const [form, setForm] = useState({
-    businessName: "AIT Business",
-    industry: "Retail",
-    timezone: "Asia/Bishkek",
-    openDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    openFrom: "09:00",
-    openTo: "18:00",
-    languages: ["English", "Russian"],
-    aiConfidenceThreshold: 75,
-    aiAutoReply: true,
-    aiDraftOnly: false,
-    escalationKeywords: "refund, cancel, urgent, lawyer",
-    teamName: "Support Team",
-    managerEmail: "manager@ait.com",
-    whatsappStatus: "connected",
-    phoneNumber: "+996 555 123 456",
-  })
-
-  const save = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
-  }
-
-  const toggleDay = (day: string) => {
-    setForm(prev => ({
-      ...prev,
-      openDays: prev.openDays.includes(day)
-        ? prev.openDays.filter(d => d !== day)
-        : [...prev.openDays, day]
-    }))
-  }
-
-  const toggleLanguage = (lang: string) => {
-    setForm(prev => ({
-      ...prev,
-      languages: prev.languages.includes(lang)
-        ? prev.languages.filter(l => l !== lang)
-        : [...prev.languages, lang]
-    }))
-  }
+export function AitSettingsContent({ data }: { data: SettingsData }) {
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("business")
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Configure your business, AI behaviour, team, and channels</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Current organization and channel configuration</p>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 bg-card border border-border rounded-xl p-1">
-        {TABS.map(t => {
-          const Icon = t.icon
+        {TABS.map((item) => {
+          const Icon = item.icon
           return (
             <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
+              key={item.id}
+              onClick={() => setTab(item.id)}
               className={cn(
                 "flex items-center gap-2 flex-1 justify-center px-3 py-2 text-xs rounded-lg font-medium transition-all",
-                tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                tab === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent",
               )}
             >
-              <Icon className="w-3.5 h-3.5" /> {t.label}
+              <Icon className="w-3.5 h-3.5" />{item.label}
             </button>
           )
         })}
       </div>
 
-      {/* Business tab */}
       {tab === "business" && (
-        <div className="flex flex-col gap-4">
-          <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Building2 className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Business Profile</h2>
-            </div>
-            <Field label="Business name">
-              <input value={form.businessName} onChange={e => setForm(p => ({...p, businessName: e.target.value}))} className={inputCls} />
-            </Field>
-            <Field label="Industry">
-              <input value={form.industry} onChange={e => setForm(p => ({...p, industry: e.target.value}))} className={inputCls} />
-            </Field>
-            <Field label="Timezone">
-              <select value={form.timezone} onChange={e => setForm(p => ({...p, timezone: e.target.value}))} className={inputCls}>
-                <option value="Asia/Bishkek">Asia/Bishkek (UTC+6)</option>
-                <option value="Europe/Moscow">Europe/Moscow (UTC+3)</option>
-                <option value="UTC">UTC</option>
-              </select>
-            </Field>
-          </div>
-          <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Clock className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Business Hours</h2>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-2">Open days</p>
-              <div className="flex gap-2 flex-wrap">
-                {DAYS.map(day => (
-                  <button
-                    key={day}
-                    onClick={() => toggleDay(day)}
-                    className={cn(
-                      "px-3 py-1.5 text-xs rounded-lg font-medium transition-colors",
-                      form.openDays.includes(day)
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-accent text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {day}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <Field label="Open from" className="flex-1">
-                <input type="time" value={form.openFrom} onChange={e => setForm(p => ({...p, openFrom: e.target.value}))} className={inputCls} />
-              </Field>
-              <Field label="Close at" className="flex-1">
-                <input type="time" value={form.openTo} onChange={e => setForm(p => ({...p, openTo: e.target.value}))} className={inputCls} />
-              </Field>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-2">Interface languages</p>
-              <div className="flex gap-2 flex-wrap">
-                {LANGUAGES.map(lang => (
-                  <button
-                    key={lang}
-                    onClick={() => toggleLanguage(lang)}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-colors",
-                      form.languages.includes(lang)
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-accent text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <Globe className="w-3 h-3" /> {lang}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AI Behaviour tab */}
-      {tab === "ai" && (
-        <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-5">
-          <div className="flex items-center gap-2 mb-1">
-            <BrainCircuit className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">AI Behaviour</h2>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">Auto-reply mode</p>
-              <p className="text-xs text-muted-foreground mt-0.5">AI sends approved replies automatically</p>
-            </div>
-            <Toggle value={form.aiAutoReply} onChange={v => setForm(p => ({...p, aiAutoReply: v}))} />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">Draft-only mode</p>
-              <p className="text-xs text-muted-foreground mt-0.5">AI drafts replies, manager always approves</p>
-            </div>
-            <Toggle value={form.aiDraftOnly} onChange={v => setForm(p => ({...p, aiDraftOnly: v}))} />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-foreground">Confidence threshold</p>
-              <span className="text-sm font-bold text-primary">{form.aiConfidenceThreshold}%</span>
-            </div>
-            <input
-              type="range" min={50} max={100} step={5}
-              value={form.aiConfidenceThreshold}
-              onChange={e => setForm(p => ({...p, aiConfidenceThreshold: Number(e.target.value)}))}
-              className="w-full accent-[hsl(var(--primary))]"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Below this threshold, AI escalates to a human</p>
-          </div>
-
-          <Field label="Escalation keywords (comma separated)">
-            <input
-              value={form.escalationKeywords}
-              onChange={e => setForm(p => ({...p, escalationKeywords: e.target.value}))}
-              className={inputCls}
-              placeholder="refund, cancel, urgent..."
-            />
-          </Field>
-        </div>
-      )}
-
-      {/* Team tab */}
-      {tab === "team" && (
         <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4">
           <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">Team</h2>
+            <Building2 className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground">Business Profile</h2>
           </div>
-          <Field label="Team name">
-            <input value={form.teamName} onChange={e => setForm(p => ({...p, teamName: e.target.value}))} className={inputCls} />
-          </Field>
-          <Field label="Manager email">
-            <input type="email" value={form.managerEmail} onChange={e => setForm(p => ({...p, managerEmail: e.target.value}))} className={inputCls} />
-          </Field>
-          <div className="p-4 bg-accent/40 rounded-xl border border-border">
-            <p className="text-xs text-muted-foreground">Team member invitations are sent via email. The manager always has full access to the audit trail and human control override.</p>
+          <ReadOnlyField label="Business name" value={data.organization.name} />
+          <ReadOnlyField label="Workspace slug" value={data.organization.slug} mono />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ReadOnlyField label="Default language" value={data.organization.defaultLanguage.toUpperCase()} icon={Globe} />
+            <ReadOnlyField label="Timezone" value={data.organization.timezone} icon={Clock} />
+          </div>
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/40 border border-border">
+            <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              Settings are read-only in this phase. Your role is <strong className="text-foreground capitalize">{data.role}</strong>.
+              {data.organizationCount > 1 && (
+                <> AIT selected this workspace deterministically from {data.organizationCount} memberships until workspace switching is implemented.</>
+              )}
+            </p>
           </div>
         </div>
       )}
 
-      {/* Channel tab */}
+      {tab === "ai" && (
+        <ComingSoon
+          icon={BrainCircuit}
+          title="AI behaviour is not configured yet"
+          description="The production schema has no AI settings or execution tables in this phase. No placeholder settings are being saved."
+        />
+      )}
+
+      {tab === "team" && (
+        <ComingSoon
+          icon={Users}
+          title="Team management is not connected yet"
+          description={`Your current membership role is ${data.role}. Invitations and team editing are outside this integration phase.`}
+        />
+      )}
+
       {tab === "channel" && (
         <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4">
           <div className="flex items-center gap-2 mb-1">
             <Smartphone className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">WhatsApp Channel</h2>
+            <h2 className="text-sm font-semibold text-foreground">Channels</h2>
           </div>
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Channel connected</p>
-              <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">{form.phoneNumber}</p>
+
+          {data.channels.length === 0 ? (
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/40 border border-border">
+              <XCircle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground">WhatsApp disconnected</p>
+                <p className="text-xs text-muted-foreground mt-0.5">No channel connection exists for this organization.</p>
+              </div>
             </div>
-          </div>
-          <Field label="Phone number">
-            <input value={form.phoneNumber} onChange={e => setForm(p => ({...p, phoneNumber: e.target.value}))} className={inputCls} />
-          </Field>
-          <button className="text-sm px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors text-foreground self-start">
-            Reconnect channel
-          </button>
+          ) : data.channels.map((channel) => (
+            <div key={channel.id} className="rounded-xl border border-border overflow-hidden">
+              <div className="flex items-start gap-3 p-4 bg-muted/20">
+                {channel.status === "connected" ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-medium text-foreground capitalize">{channel.displayName ?? channel.channelType}</p>
+                    <Badge variant="outline" className="capitalize text-[10px]">{channel.status.replace("_", " ")}</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">Provider: {channel.provider}</p>
+                  {channel.connectedPhoneNumber && (
+                    <p className="text-xs text-muted-foreground mt-0.5">{channel.connectedPhoneNumber}</p>
+                  )}
+                  {channel.lastError && (
+                    <p className="text-xs text-destructive mt-1">{channel.lastError}</p>
+                  )}
+                </div>
+              </div>
+              <div className="px-4 py-3 border-t border-border text-xs text-muted-foreground space-y-1">
+                {channel.metaConfigurationVisible ? (
+                  <>
+                    <p>Meta identifiers: {channel.metaIdentifiersConfigured ? "Configured" : "Not configured"}</p>
+                    <p>Webhook subscription: {channel.webhookSubscriptionStatus ?? "Unavailable"}</p>
+                  </>
+                ) : (
+                  <p>Provider-specific identifiers are visible only to organization owners.</p>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <Button variant="outline" className="self-start" disabled title="Meta connection flow is outside this task">
+            Connect WhatsApp Business
+          </Button>
+          <p className="text-xs text-muted-foreground">Connection behavior will be implemented in a later Meta integration task.</p>
         </div>
       )}
+    </div>
+  )
+}
 
-      {/* Save button */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={save}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium text-sm transition-colors"
-        >
-          {saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {saved ? "Saved" : "Save changes"}
-        </button>
-        {saved && <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Changes saved successfully</p>}
+function ReadOnlyField({
+  label,
+  value,
+  mono = false,
+  icon: Icon,
+}: {
+  label: string
+  value: string
+  mono?: boolean
+  icon?: React.ElementType
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <div className={cn("flex items-center gap-2 px-3 py-2 text-sm bg-muted/30 border border-border rounded-lg text-foreground", mono && "font-mono text-xs")}>
+        {Icon && <Icon className="w-3.5 h-3.5 text-muted-foreground" />}
+        {value}
       </div>
     </div>
   )
 }
 
-function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
+function ComingSoon({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: React.ElementType
+  title: string
+  description: string
+}) {
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
-      <label className="text-xs font-medium text-muted-foreground">{label}</label>
-      {children}
+    <div className="bg-card border border-border rounded-xl p-8 text-center">
+      <Icon className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+      <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">{description}</p>
     </div>
   )
 }
-
-function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      onClick={() => onChange(!value)}
-      className={cn(
-        "relative w-11 h-6 rounded-full transition-colors flex-shrink-0",
-        value ? "bg-primary" : "bg-border"
-      )}
-    >
-      <span className={cn(
-        "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
-        value ? "translate-x-6" : "translate-x-1"
-      )} />
-    </button>
-  )
-}
-
-const inputCls = "w-full px-3 py-2 text-sm bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
