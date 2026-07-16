@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, Zap } from "lucide-react"
+import { Menu, X } from "lucide-react"
+import { AitLogo } from "@/components/brand/ait-logo"
 
 const navLinks = [
   { label: "Product", href: "#product" },
@@ -57,18 +58,7 @@ export function LandingNav() {
           className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DE2B1] rounded-md"
           aria-label="AIT home"
         >
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: "#2DE2B1" }}
-          >
-            <Zap className="w-4 h-4" style={{ color: "#071A1B" }} aria-hidden="true" />
-          </div>
-          <span
-            className="text-lg font-bold tracking-tight"
-            style={{ color: "#FFFFFF" }}
-          >
-            AIT
-          </span>
+          <AitLogo variant="wordmark" theme="sidebar" size="sm" label="AIT" />
         </Link>
 
         {/* Desktop links */}

@@ -1,3 +1,5 @@
+import { AitLogo } from "@/components/brand/ait-logo"
+
 export default function Loading() {
   return (
     <div
@@ -6,26 +8,16 @@ export default function Loading() {
       aria-label="Loading"
     >
       <div className="flex flex-col items-center gap-4 animate-fade-in">
-        {/* Signal logomark pulse */}
+        {/* AIT Fold logomark with ripple ring */}
         <div className="relative">
-          <div className="w-12 h-12 rounded-2xl bg-[#2DE2B1]/15 border border-[#2DE2B1]/20 flex items-center justify-center">
-            <svg
-              viewBox="0 0 16 16"
-              className="w-5 h-5 text-[#2DE2B1]"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <polygon points="3,1 13,8 3,15" />
-            </svg>
+          <div className="w-14 h-14 rounded-2xl bg-[#2DE2B1]/15 border border-[#2DE2B1]/20 flex items-center justify-center">
+            <AitLogo variant="symbol" theme="sidebar" size="md" label="Loading AIT" />
           </div>
-          {/* Ripple ring */}
+          {/* Ripple ring — respects prefers-reduced-motion via Tailwind */}
           <span
-            className="absolute inset-0 rounded-2xl border border-[#2DE2B1]/20 animate-ping"
+            className="absolute inset-0 rounded-2xl border border-[#2DE2B1]/20 motion-safe:animate-ping"
             style={{ animationDuration: "1.8s" }}
+            aria-hidden="true"
           />
         </div>
 
@@ -34,7 +26,7 @@ export default function Loading() {
           <div className="h-2.5 w-40 rounded skeleton mx-auto" />
         </div>
       </div>
-      <span className="sr-only">Loading Signal workspace…</span>
+      <span className="sr-only">Loading AIT workspace…</span>
     </div>
   )
 }

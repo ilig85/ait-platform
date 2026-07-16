@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState, useTransition } from "react"
-import { Zap, Loader2, Mail, RotateCcw } from "lucide-react"
+import { Loader2, Mail, RotateCcw } from "lucide-react"
+import { AitLogo } from "@/components/brand/ait-logo"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
@@ -57,10 +58,7 @@ export default function VerifyEmailPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-[#0F766E] flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-xl text-[#15253D]">AIT</span>
+          <AitLogo variant="wordmark" theme="light" size="md" label="AIT" />
         </div>
 
         {/* Icon */}
@@ -116,7 +114,7 @@ export default function VerifyEmailPage() {
         {/* Primary CTA after confirming */}
         <Link
           href="/login"
-          className="mt-6 flex w-full items-center justify-center rounded-lg bg-[#0F766E] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#0F766E]/90 transition-colors"
+          className="mt-6 flex w-full items-center justify-center rounded-lg bg-[#2DE2B1] px-4 py-2.5 text-sm font-semibold text-[#071A1B] hover:bg-[#25c99e] transition-colors"
         >
           I confirmed my email &mdash; Sign in
         </Link>

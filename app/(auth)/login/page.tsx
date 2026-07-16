@@ -3,7 +3,8 @@
 import { useState, useTransition, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Zap, CheckCircle2, Shield, MessageSquare, Globe } from "lucide-react"
+import { CheckCircle2, Shield, MessageSquare, Globe } from "lucide-react"
+import { AitLogo } from "@/components/brand/ait-logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -54,14 +55,11 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#15253D] flex-col justify-between p-12">
+      {/* Left panel — Signal brand colors */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#071A1B] flex-col justify-between p-12">
         <div>
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 rounded-xl bg-[#0F766E] flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-white font-bold text-2xl tracking-tight">AIT</span>
+            <AitLogo variant="wordmark" theme="sidebar" size="lg" label="AIT" />
           </div>
           <h2 className="text-white text-3xl font-bold leading-snug text-balance mb-4">
             {t("auth_tagline")}
@@ -72,7 +70,7 @@ function LoginForm() {
           <div className="space-y-4">
             {[t("auth_benefit_1"), t("auth_benefit_2"), t("auth_benefit_3")].map((b) => (
               <div key={b} className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-[#0F766E] mt-0.5 flex-shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-[#2DE2B1] mt-0.5 flex-shrink-0" />
                 <p className="text-white/80 text-sm">{b}</p>
               </div>
             ))}
@@ -89,10 +87,7 @@ function LoginForm() {
       <div className="flex-1 flex flex-col items-center justify-center p-6">
         {/* Mobile logo */}
         <div className="flex items-center gap-2 mb-8 lg:hidden">
-          <div className="w-8 h-8 rounded-lg bg-[#0F766E] flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-xl text-[#15253D]">AIT</span>
+          <AitLogo variant="wordmark" theme="light" size="md" label="AIT" />
         </div>
 
         <div className="w-full max-w-sm">
@@ -148,7 +143,7 @@ function LoginForm() {
               <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">{t("auth_remember_me")}</Label>
             </div>
             {confirmed && (
-              <p className="text-sm text-[#0F766E] bg-[#0F766E]/10 rounded-md px-3 py-2">
+              <p className="text-sm text-[#2DE2B1] bg-[#2DE2B1]/10 rounded-md px-3 py-2">
                 Email confirmed successfully. Sign in with your email and password to continue.
               </p>
             )}
@@ -158,7 +153,7 @@ function LoginForm() {
               </p>
             )}
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full bg-[#0F766E] hover:bg-[#0F766E]/90 text-white" disabled={isPending}>
+            <Button type="submit" className="w-full bg-[#2DE2B1] hover:bg-[#25c99e] text-[#071A1B] font-semibold" disabled={isPending}>
               {isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
               {isPending ? t("auth_logging_in") : t("auth_login")}
             </Button>

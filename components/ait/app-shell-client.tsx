@@ -15,8 +15,8 @@ import {
   Settings,
   Sparkles,
   Users,
-  Zap,
 } from "lucide-react"
+import { AitLogo } from "@/components/brand/ait-logo"
 import { AitSidebar } from "@/components/ait/sidebar"
 import { ShellProvider, useShellData } from "@/components/ait/shell-context"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -46,11 +46,9 @@ function MobileNav() {
   return (
     <div className="lg:hidden fixed top-0 inset-x-0 z-50 flex items-center justify-between h-14 px-4 bg-sidebar border-b border-sidebar-border">
       <div className="flex items-center gap-2.5 min-w-0">
-        <div className="w-7 h-7 rounded-md bg-[#2DE2B1] flex items-center justify-center flex-shrink-0">
-          <Zap className="w-3.5 h-3.5 text-[#071A1B]" strokeWidth={2.5} />
-        </div>
+        <AitLogo variant="symbol" theme="sidebar" size="sm" label="AIT" />
         <div className="min-w-0 leading-none">
-          <span className="text-sidebar-foreground font-bold text-base tracking-tight">Signal</span>
+          <span className="text-sidebar-foreground font-bold text-base tracking-tight">AIT</span>
           <p className="text-sidebar-foreground/40 text-[9px] mt-0.5 truncate max-w-32">
             {organizationName ?? "No organization"}
           </p>
@@ -87,12 +85,10 @@ function MobileNav() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-60 p-0 bg-sidebar border-sidebar-border">
-            <div className="flex items-center gap-3 h-14 px-4 border-b border-sidebar-border">
-              <div className="w-7 h-7 rounded-md bg-[#2DE2B1] flex items-center justify-center flex-shrink-0">
-                <Zap className="w-3.5 h-3.5 text-[#071A1B]" strokeWidth={2.5} />
-              </div>
+            <div className="flex items-center gap-2.5 h-14 px-4 border-b border-sidebar-border">
+              <AitLogo variant="symbol" theme="sidebar" size="sm" label="AIT" />
               <div className="min-w-0 leading-none">
-                <span className="text-sidebar-foreground font-bold text-base tracking-tight">Signal</span>
+                <span className="text-sidebar-foreground font-bold text-base tracking-tight">AIT</span>
                 <p className="text-sidebar-foreground/40 text-[10px] mt-0.5 truncate">
                   {organizationName ?? "No organization"}
                 </p>

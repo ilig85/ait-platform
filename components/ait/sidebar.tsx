@@ -15,12 +15,12 @@ import {
   Settings,
   Sparkles,
   Users,
-  Zap,
 } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useI18n } from "@/lib/i18n"
 import { useShellData } from "@/components/ait/shell-context"
 import { cn } from "@/lib/utils"
+import { AitLogo } from "@/components/brand/ait-logo"
 
 const NAV_ITEMS = [
   { href: "/dashboard", labelKey: "nav_overview" as const, icon: LayoutDashboard },
@@ -57,15 +57,19 @@ export function AitSidebar() {
           collapsed ? "justify-center" : "gap-3",
         )}
       >
-        <div className="w-7 h-7 rounded-md bg-[#2DE2B1] flex items-center justify-center flex-shrink-0">
-          <Zap className="w-3.5 h-3.5 text-[#071A1B]" strokeWidth={2.5} />
-        </div>
-        {!collapsed && (
-          <div className="min-w-0 leading-none">
-            <span className="text-sidebar-foreground font-bold text-base tracking-tight">Signal</span>
-            <p className="text-sidebar-foreground/40 text-[10px] mt-0.5 truncate">
-              {organizationName ?? "No organization"}
-            </p>
+        {collapsed ? (
+          /* Mark only when collapsed */
+          <AitLogo variant="symbol" theme="sidebar" size="sm" label="AIT" />
+        ) : (
+          /* Mark + wordmark + org name when expanded */
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AitLogo variant="symbol" theme="sidebar" size="sm" label="AIT" />
+            <div className="min-w-0 leading-none">
+              <span className="text-sidebar-foreground font-bold text-base tracking-tight">AIT</span>
+              <p className="text-sidebar-foreground/40 text-[10px] mt-0.5 truncate">
+                {organizationName ?? "No organization"}
+              </p>
+            </div>
           </div>
         )}
       </div>
