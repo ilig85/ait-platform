@@ -26,6 +26,12 @@ export function HeroAnimation() {
 
   // Run the animation sequence on repeat
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setStep("summary")
+      setTypedReply(replyText)
+      return
+    }
+
     let idx = -1
 
     const next = () => {
