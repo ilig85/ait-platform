@@ -4,6 +4,17 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* AIT Landing Brand Tokens */
+  --land-deep-ink: #071A1B;
+  --land-forest-ink: #0D292A;
+  --land-mint: #2DE2B1;
+  --land-sky: #67D9FF;
+  --land-warm-cloud: #F6F5EF;
+  --land-main-text: #102223;
+  --land-coral: #FF6B6B;
+  --land-mint-dim: rgba(45, 226, 177, 0.12);
+  --land-sky-dim: rgba(103, 217, 255, 0.10);
+
   /* AIT Design Tokens */
   --ait-navy: #15253D;
   --ait-teal: #0F766E;
@@ -158,3 +169,43 @@
 .animate-slide-in-up { animation: slideInUp 0.4s ease-out forwards; }
 .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
 .animate-shimmer { animation: shimmer 1.5s ease-in-out infinite; }
+
+/* Landing page animations */
+@keyframes land-fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes land-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes land-typing-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@keyframes land-signal-pulse {
+  0%, 100% { opacity: 0.4; transform: scaleX(1); }
+  50%       { opacity: 1;   transform: scaleX(1.04); }
+}
+@keyframes land-message-in {
+  from { opacity: 0; transform: translateX(-12px) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes land-reply-in {
+  from { opacity: 0; transform: translateX(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes land-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+.land-fade-up   { animation: land-fade-up 0.6s ease-out forwards; }
+.land-fade-in   { animation: land-fade-in 0.5s ease-out forwards; }
+.land-float     { animation: land-float 4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .land-fade-up,
+  .land-fade-in,
+  .land-float { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
