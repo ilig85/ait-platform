@@ -75,7 +75,7 @@ export function AitSettingsContent({ data }: { data: SettingsData }) {
               <strong className="text-foreground capitalize">{data.role}</strong>.
               {data.organizationCount > 1 && (
                 <>
-                  {" "}Signal selected this workspace deterministically from {data.organizationCount} memberships until workspace switching is implemented.
+                  {" "}AIT selected this workspace deterministically from {data.organizationCount} memberships until workspace switching is implemented.
                 </>
               )}
             </p>

@@ -83,7 +83,10 @@ export function LandingHero() {
               href="#how-it-works"
               onClick={(e) => {
                 e.preventDefault()
-                document.querySelector("#how-it-works")?.scrollIntoView({ behavior: "smooth" })
+                const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                  ? "auto"
+                  : "smooth"
+                document.querySelector("#how-it-works")?.scrollIntoView({ behavior })
               }}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DE2B1] w-full sm:w-auto"
               style={{
@@ -160,7 +163,10 @@ export function LandingHero() {
           href="#product"
           onClick={(e) => {
             e.preventDefault()
-            document.querySelector("#product")?.scrollIntoView({ behavior: "smooth" })
+            const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+              ? "auto"
+              : "smooth"
+            document.querySelector("#product")?.scrollIntoView({ behavior })
           }}
           aria-label="Scroll to product features"
           className="flex flex-col items-center gap-2 opacity-40 hover:opacity-70 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DE2B1] rounded-md p-1"

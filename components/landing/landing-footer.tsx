@@ -34,7 +34,10 @@ export function LandingFooter() {
   const handleAnchor = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("#")) {
       e.preventDefault()
-      document.querySelector(href)?.scrollIntoView({ behavior: "smooth" })
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth"
+      document.querySelector(href)?.scrollIntoView({ behavior })
     }
   }
 

@@ -29,7 +29,12 @@ export function LandingNav() {
       e.preventDefault()
       setMobileOpen(false)
       const el = document.querySelector(href)
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" })
+      if (el) {
+        const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth"
+        el.scrollIntoView({ behavior, block: "start" })
+      }
     }
   }
 
