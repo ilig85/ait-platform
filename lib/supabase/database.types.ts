@@ -448,6 +448,14 @@ export type Database = {
     }
     Views: { [_ in never]: never }
     Functions: {
+      ait_advance_message_delivery_status: {
+        Args: {
+          target_channel_connection_id: string
+          target_provider_message_id: string
+          target_status: Database["public"]["Enums"]["message_delivery_status"]
+        }
+        Returns: boolean
+      }
       ait_generate_unique_organization_slug: {
         Args: { preferred_base: string; stable_seed: string }
         Returns: string
@@ -462,6 +470,32 @@ export type Database = {
       ait_is_organization_member: {
         Args: { target_organization_id: string }
         Returns: boolean
+      }
+      ait_mark_outbound_message_sent: {
+        Args: {
+          target_message_id: string
+          target_organization_id: string
+          target_provider_message_id: string
+          target_provider_timestamp: string
+        }
+        Returns: boolean
+      }
+      ait_record_inbound_text: {
+        Args: {
+          target_organization_id: string
+          target_channel_connection_id: string
+          target_provider_message_id: string
+          target_external_contact_id: string
+          target_phone_number: string
+          target_display_name: string | null
+          target_text_body: string
+          target_provider_timestamp: string
+        }
+        Returns: {
+          message_id: string
+          conversation_id: string
+          created: boolean
+        }[]
       }
       ait_users_share_organization: {
         Args: { target_user_id: string }
