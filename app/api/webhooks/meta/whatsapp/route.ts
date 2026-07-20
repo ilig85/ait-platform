@@ -1,14 +1,62 @@
+import { randomUUID } from "node:crypto"
 import { NextResponse } from "next/server"
 import { createMetaWebhookAdapter } from "@/lib/messaging/meta/adapter"
+import { diagnoseMetaWhatsAppWebhook } from "@/lib/messaging/meta/webhook-parser"
 import { requiredServerEnv, verifyWebhookChallenge } from "@/lib/messaging/security"
 import { SupabaseWebhookMessageStore } from "@/lib/messaging/supabase-stores"
-import { processProviderWebhook } from "@/lib/messaging/webhook-service"
+import {
+  processProviderWebhook,
+  type WebhookProcessingResult,
+} from "@/lib/messaging/webhook-service"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 const MAX_WEBHOOK_BYTES = 1_000_000
+const WEBHOOK_LOG_EVENT = "ait.meta_whatsapp_webhook"
+
+type WebhookLogLevel = "info" | "warn" | "error"
+
+function logWebhook(
+  level: WebhookLogLevel,
+  diagnosticId: string,
+  outcome: string,
+  startedAt: number,
+  details: Record<string, unknown> = {},
+) {
+  console[level](WEBHOOK_LOG_EVENT, {
+    diagnosticId,
+    outcome,
+    elapsedMs: Date.now() - startedAt,
+    ...details,
+  })
+}
+
+function safeErrorMetadata(error: unknown): Record<string, string> {
+  const metadata: Record<string, string> = {}
+  if (error instanceof Error && error.name) metadata.errorName = error.name
+
+  if (error !== null && typeof error === "object") {
+    const code = (error as Record<string, unknown>).code
+    if (typeof code === "string" && /^[a-zA-Z0-9_.-]{1,64}$/.test(code)) {
+      metadata.errorCode = code
+    }
+  }
+
+  return metadata
+}
+
+function successfulOutcome(result: WebhookProcessingResult): string {
+  if (result.created > 0) return "inbound_created"
+  if (result.duplicates > 0) return "inbound_duplicate"
+  if (result.received === 0) return "no_supported_events"
+  if (result.ignoredUnmapped === result.received) return "unmapped_recipient"
+  if (result.inboundTextsReceived === 0 && result.deliveryStatusesReceived > 0) {
+    return result.statusesAdvanced > 0 ? "delivery_status_advanced" : "delivery_status_no_match"
+  }
+  return "processed"
+}
 
 export async function GET(request: Request) {
   let verification
@@ -32,33 +80,58 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const diagnosticId = randomUUID()
+  const startedAt = Date.now()
   const contentLength = Number(request.headers.get("content-length") ?? "0")
+
   if (Number.isFinite(contentLength) && contentLength > MAX_WEBHOOK_BYTES) {
-    return NextResponse.json({ error: "Webhook body is too large." }, { status: 413 })
+    logWebhook("warn", diagnosticId, "body_too_large", startedAt, { declaredBytes: contentLength })
+    return NextResponse.json(
+      { error: "Webhook body is too large.", diagnosticId },
+      { status: 413 },
+    )
   }
 
   const rawBody = new Uint8Array(await request.arrayBuffer())
   if (rawBody.byteLength > MAX_WEBHOOK_BYTES) {
-    return NextResponse.json({ error: "Webhook body is too large." }, { status: 413 })
+    logWebhook("warn", diagnosticId, "body_too_large", startedAt, { bodyBytes: rawBody.byteLength })
+    return NextResponse.json(
+      { error: "Webhook body is too large.", diagnosticId },
+      { status: 413 },
+    )
   }
 
   let adapter
   try {
     adapter = createMetaWebhookAdapter()
-  } catch {
-    return NextResponse.json({ error: "Webhook processing is not configured." }, { status: 500 })
+  } catch (error) {
+    logWebhook("error", diagnosticId, "configuration_failed", startedAt, safeErrorMetadata(error))
+    return NextResponse.json(
+      { error: "Webhook processing is not configured.", diagnosticId },
+      { status: 500 },
+    )
   }
 
   if (!adapter.verifyWebhookSignature(rawBody, request.headers.get("x-hub-signature-256"))) {
-    return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 })
+    logWebhook("warn", diagnosticId, "invalid_signature", startedAt, { bodyBytes: rawBody.byteLength })
+    return NextResponse.json(
+      { error: "Invalid webhook signature.", diagnosticId },
+      { status: 401 },
+    )
   }
 
   let payload: unknown
   try {
     payload = JSON.parse(Buffer.from(rawBody).toString("utf8"))
   } catch {
-    return NextResponse.json({ error: "Invalid webhook JSON." }, { status: 400 })
+    logWebhook("warn", diagnosticId, "invalid_json", startedAt, { bodyBytes: rawBody.byteLength })
+    return NextResponse.json(
+      { error: "Invalid webhook JSON.", diagnosticId },
+      { status: 400 },
+    )
   }
+
+  const payloadDiagnostics = diagnoseMetaWhatsAppWebhook(payload)
 
   try {
     const result = await processProviderWebhook(
@@ -66,8 +139,25 @@ export async function POST(request: Request) {
       payload,
       new SupabaseWebhookMessageStore(createAdminClient()),
     )
-    return NextResponse.json({ acknowledged: true, ...result })
-  } catch {
-    return NextResponse.json({ error: "Webhook processing failed." }, { status: 500 })
+    const outcome = successfulOutcome(result)
+    logWebhook("info", diagnosticId, outcome, startedAt, {
+      payload: payloadDiagnostics,
+      processing: result,
+    })
+    return NextResponse.json({
+      acknowledged: true,
+      diagnosticId,
+      outcome,
+      ...result,
+    })
+  } catch (error) {
+    logWebhook("error", diagnosticId, "processing_failed", startedAt, {
+      payload: payloadDiagnostics,
+      ...safeErrorMetadata(error),
+    })
+    return NextResponse.json(
+      { error: "Webhook processing failed.", diagnosticId },
+      { status: 500 },
+    )
   }
 }
