@@ -219,6 +219,38 @@ export type Database = {
           updated_at?: string
         }
       >
+      channel_connection_credentials: TableDefinition<
+        {
+          channel_connection_id: string
+          provider: string
+          encrypted_access_token: string
+          access_token_expires_at: string | null
+          encrypted_registration_pin: string | null
+          key_version: number
+          created_at: string
+          updated_at: string
+        },
+        {
+          channel_connection_id: string
+          provider: string
+          encrypted_access_token: string
+          access_token_expires_at?: string | null
+          encrypted_registration_pin?: string | null
+          key_version?: number
+          created_at?: string
+          updated_at?: string
+        },
+        {
+          channel_connection_id?: string
+          provider?: string
+          encrypted_access_token?: string
+          access_token_expires_at?: string | null
+          encrypted_registration_pin?: string | null
+          key_version?: number
+          created_at?: string
+          updated_at?: string
+        }
+      >
       contacts: TableDefinition<
         {
           id: string
@@ -448,6 +480,21 @@ export type Database = {
     }
     Views: { [_ in never]: never }
     Functions: {
+      ait_install_meta_whatsapp_connection: {
+        Args: {
+          target_organization_id: string
+          target_meta_app_id: string
+          target_business_portfolio_id: string
+          target_waba_id: string
+          target_phone_number_id: string
+          target_display_phone_number: string
+          target_verified_name: string
+          target_encrypted_access_token: string
+          target_access_token_expires_at: string | null
+          target_encrypted_registration_pin: string
+        }
+        Returns: string
+      }
       ait_advance_message_delivery_status: {
         Args: {
           target_channel_connection_id: string
