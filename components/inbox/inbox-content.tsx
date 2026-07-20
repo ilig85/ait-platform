@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   AlertCircle,
   CheckCircle2,
   Clock,
   Info,
+  Loader2,
   MessageSquare,
   Search,
   Send,
@@ -74,6 +76,33 @@ function relativeTime(iso: string) {
   const hours = Math.floor(minutes / 60)
   if (hours < 24) return `${hours}h`
   return `${Math.floor(hours / 24)}d`
+}
+
+function outboundErrorMessage(
+  responseStatus: number,
+  payload: { status?: string; message?: string } | null,
+) {
+  if (payload?.message) return payload.message
+  switch (payload?.status) {
+    case "unauthenticated":
+      return "Your session has expired. Sign in again before sending."
+    case "forbidden":
+      return "Only organization owners and managers can send replies."
+    case "not_found":
+      return "This conversation is no longer available."
+    case "approved_template_required":
+      return "The 24-hour reply window is closed. An approved template is required."
+    case "channel_unavailable":
+      return "The WhatsApp channel is unavailable. Check Settings and try again."
+    case "provider_error":
+      return "WhatsApp rejected the message. Check the provider configuration and try again."
+    case "invalid_message":
+      return "Enter a valid message before sending."
+    default:
+      return responseStatus >= 500
+        ? "AIT could not send the message. Try again in a moment."
+        : "The message could not be sent."
+  }
 }
 
 function ConvRow({
@@ -209,6 +238,7 @@ export function InboxContent({
   initialFilter?: string
 }) {
   const { t } = useI18n()
+  const router = useRouter()
   const validFilter = FILTERS.includes(initialFilter as Filter) ? (initialFilter as Filter) : "all"
   const [filter, setFilter] = useState<Filter>(validFilter)
   const [search, setSearch] = useState("")
@@ -218,6 +248,50 @@ export function InboxContent({
       : data.conversations[0]?.id ?? "",
   )
   const [showCustomerPanel, setShowCustomerPanel] = useState(true)
+  const [draft, setDraft] = useState("")
+  const [isSending, setIsSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
+
+  function selectConversation(conversationId: string) {
+    setActiveId(conversationId)
+    setDraft("")
+    setSendError(null)
+  }
+
+  async function sendMessage() {
+    const text = draft.trim()
+    if (!activeId || !text || isSending || !data.whatsappConnected) return
+
+    setIsSending(true)
+    setSendError(null)
+
+    try {
+      const response = await fetch(
+        `/api/conversations/${encodeURIComponent(activeId)}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        },
+      )
+      const payload = await response.json().catch(() => null) as {
+        status?: string
+        message?: string
+      } | null
+
+      if (!response.ok) {
+        setSendError(outboundErrorMessage(response.status, payload))
+        return
+      }
+
+      setDraft("")
+      router.refresh()
+    } catch {
+      setSendError("AIT could not reach the server. Check your connection and try again.")
+    } finally {
+      setIsSending(false)
+    }
+  }
 
   const filtered = useMemo(
     () =>
@@ -307,7 +381,7 @@ export function InboxContent({
                   key={conversation.id}
                   conversation={conversation}
                   active={conversation.id === active?.id}
-                  onClick={() => setActiveId(conversation.id)}
+                  onClick={() => selectConversation(conversation.id)}
                 />
               ))
             )}
@@ -379,22 +453,65 @@ export function InboxContent({
               )}
 
               {/* Compose area */}
-              <div className="border-t border-border/60 p-3 flex-shrink-0">
+              <form
+                className="border-t border-border/60 p-3 flex-shrink-0"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  void sendMessage()
+                }}
+              >
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
                   <Info className="w-3.5 h-3.5 flex-shrink-0" />
-                  Sending is not enabled in this integration phase.
+                  Replies are available during the 24-hour WhatsApp customer-service window.
                 </div>
+                {sendError && (
+                  <Alert className="mb-2 border-destructive/30 bg-destructive/5 py-2">
+                    <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                    <AlertDescription className="ml-1 text-xs text-destructive">
+                      {sendError}
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div className="relative">
                   <Textarea
-                    placeholder="Message sending will be enabled with the provider integration."
-                    className="min-h-[64px] resize-none text-sm pr-12 bg-muted/20"
-                    disabled
+                    aria-label="Message reply"
+                    placeholder={
+                      data.whatsappConnected
+                        ? "Write a reply…"
+                        : "Connect WhatsApp before sending a reply."
+                    }
+                    className="min-h-[64px] resize-none text-sm pr-12"
+                    value={draft}
+                    maxLength={4096}
+                    disabled={!data.whatsappConnected || isSending}
+                    onChange={(event) => {
+                      setDraft(event.target.value)
+                      if (sendError) setSendError(null)
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault()
+                        void sendMessage()
+                      }
+                    }}
                   />
-                  <Button size="sm" className="absolute bottom-2 right-2 h-7 w-7 p-0" disabled>
-                    <Send className="w-3.5 h-3.5" />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="absolute bottom-2 right-2 h-7 w-7 p-0"
+                    disabled={
+                      !data.whatsappConnected
+                      || isSending
+                      || draft.trim().length === 0
+                    }
+                    aria-label={isSending ? "Sending reply" : "Send reply"}
+                  >
+                    {isSending
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : <Send className="w-3.5 h-3.5" />}
                   </Button>
                 </div>
-              </div>
+              </form>
             </div>
 
             {/* Customer side panel */}
