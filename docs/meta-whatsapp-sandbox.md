@@ -169,3 +169,32 @@ No database row or source file should change during token rotation. The adapter 
 ## Before connecting a production number
 
 Production still needs a reviewed credential vault/per-connection resolver, durable Meta system-user credentials and rotation, Meta business/app/number readiness, Embedded Signup or another approved onboarding flow, template support outside the service window, operational retry/reconciliation, webhook monitoring and alerting, rate-limit handling, media policy/processing, data-retention review, and end-to-end staging/security testing. This sandbox foundation must not be treated as production onboarding.
+
+## Diagnose HTTP 200 with no Inbox message
+
+Meta expects the webhook endpoint to acknowledge valid deliveries even when the payload does not contain a supported inbound text message. For that reason, HTTP `200` alone does not mean AIT created a contact, conversation, or message.
+
+Every POST now returns a `diagnosticId` and a privacy-safe `outcome`. Search the Vercel runtime logs for `ait.meta_whatsapp_webhook` and that `diagnosticId`. The log contains counts and booleans only; it never includes message text, customer names, phone numbers, provider message IDs, signatures, tokens, secrets, or the raw payload.
+
+| Outcome | Meaning | Next check |
+| --- | --- | --- |
+| `inbound_created` | A supported inbound text event was stored. | Refresh Inbox for the mapped organization. |
+| `inbound_duplicate` | Meta retried a provider message ID that was already stored. | No second Inbox row is expected. |
+| `no_supported_events` | The signed payload produced no supported text or delivery-status events. | Inspect the payload counters below. |
+| `unmapped_recipient` | Events parsed, but `metadata.phone_number_id` did not resolve to a trusted connection. | Check the exact `meta_whatsapp_connections.phone_number_id` mapping in Supabase. |
+| `delivery_status_advanced` | The delivery updated an existing outbound message. | No new contact or inbound Inbox row is expected. |
+| `delivery_status_no_match` | The payload was a delivery status, but no stored outbound message advanced. | Confirm the outbound provider message ID was stored earlier. |
+| `processing_failed` | Parsing reached database processing, which failed and returned HTTP `500`. | Match the `diagnosticId`; the log includes only the safe error name/code. |
+
+Useful payload counters:
+
+- `recognizedObject`: whether `object` was exactly `whatsapp_business_account`.
+- `messageFieldChanges`: changes whose field was exactly `messages`.
+- `ignoredNonMessageChanges`: synthetic/dashboard or other non-message changes.
+- `changesMissingPhoneNumberId`: message changes without `metadata.phone_number_id`.
+- `messageObjects` / `statusObjects`: raw object counts inside recognized message changes.
+- `parsedInboundTexts` / `parsedDeliveryStatuses`: supported events passed to processing.
+- `ignoredUnsupportedMessages`: media or other intentionally unsupported message types.
+- `ignoredMalformedMessages` / `ignoredMalformedStatuses`: objects missing a required ID, sender, timestamp, status, or text body.
+
+The processing counters then show whether parsed events were created, treated as duplicates, applied as status changes, or ignored because no trusted channel mapping existed.
