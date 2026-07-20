@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createMetaOutboundAdapter } from "@/lib/messaging/meta/adapter"
+import { SupabaseMetaWhatsAppCredentialResolver } from "@/lib/messaging/meta/credential-resolver"
 import { sendServiceWindowReply } from "@/lib/messaging/outbound-service"
 import { SupabaseOutboundMessageStore } from "@/lib/messaging/supabase-stores"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -30,7 +31,9 @@ export async function POST(
   try {
     const userClient = await createClient()
     const admin = createAdminClient()
-    const metaAdapter = createMetaOutboundAdapter()
+    const metaAdapter = createMetaOutboundAdapter(
+      new SupabaseMetaWhatsAppCredentialResolver(admin),
+    )
     const result = await sendServiceWindowReply(
       { conversationId, text },
       {
