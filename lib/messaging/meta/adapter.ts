@@ -111,8 +111,10 @@ export function createMetaWebhookAdapter(): MetaWhatsAppAdapter {
   })
 }
 
-export function createMetaOutboundAdapter(): MetaWhatsAppAdapter {
+export function createMetaOutboundAdapter(
+  credentialResolver: MetaWhatsAppCredentialResolver = new EnvironmentMetaWhatsAppCredentialResolver(),
+): MetaWhatsAppAdapter {
   return new MetaWhatsAppAdapter({
-    credentialResolver: new EnvironmentMetaWhatsAppCredentialResolver(),
+    credentialResolver,
   })
 }

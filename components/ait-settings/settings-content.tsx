@@ -13,7 +13,7 @@ import {
   XCircle,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { WhatsAppConnectButton } from "@/components/ait-settings/whatsapp-connect-button"
 import type { SettingsData } from "@/lib/data/models"
 import { cn } from "@/lib/utils"
 
@@ -24,7 +24,15 @@ const TABS = [
   { id: "channel", label: "Channel", icon: Smartphone },
 ] as const
 
-export function AitSettingsContent({ data }: { data: SettingsData }) {
+export function AitSettingsContent({
+  data,
+  metaAppId,
+  metaEmbeddedSignupConfigurationId,
+}: {
+  data: SettingsData
+  metaAppId: string | null
+  metaEmbeddedSignupConfigurationId: string | null
+}) {
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("business")
 
   return (
@@ -157,17 +165,11 @@ export function AitSettingsContent({ data }: { data: SettingsData }) {
             ))
           )}
 
-          <Button
-            variant="outline"
-            className="self-start border-border/60"
-            disabled
-            title="Meta connection flow is outside this task"
-          >
-            Connect WhatsApp Business
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Connection behavior will be implemented in a later Meta integration task.
-          </p>
+          <WhatsAppConnectButton
+            appId={metaAppId}
+            configurationId={metaEmbeddedSignupConfigurationId}
+            owner={data.role === "owner"}
+          />
         </div>
       )}
     </div>

@@ -9,7 +9,13 @@ export default async function SettingsPage() {
   return (
     <AppShell>
       {result.status === "ready" ? (
-        <AitSettingsContent data={result.data} />
+        <AitSettingsContent
+          data={result.data}
+          metaAppId={process.env.NEXT_PUBLIC_META_APP_ID ?? null}
+          metaEmbeddedSignupConfigurationId={
+            process.env.NEXT_PUBLIC_META_WHATSAPP_EMBEDDED_SIGNUP_CONFIG_ID ?? null
+          }
+        />
       ) : (
         <>
           <AitHeader title="Settings" subtitle="Current organization and channel configuration." />
