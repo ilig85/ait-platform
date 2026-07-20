@@ -251,7 +251,7 @@ export function InboxContent({
   const [draft, setDraft] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
-  const messageEndRef = useRef<HTMLDivElement>(null)
+  const messageViewportRef = useRef<HTMLDivElement>(null)
 
   function selectConversation(conversationId: string) {
     setActiveId(conversationId)
@@ -316,7 +316,8 @@ export function InboxContent({
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      messageEndRef.current?.scrollIntoView({ block: "end" })
+      const viewport = messageViewportRef.current
+      if (viewport) viewport.scrollTop = viewport.scrollHeight
     })
 
     return () => window.cancelAnimationFrame(frame)
@@ -417,6 +418,10 @@ export function InboxContent({
                       <p className="text-[10px] text-muted-foreground capitalize">
                         {statusFor(active).replace("_", " ")}
                       </p>
+                      <span className="text-[10px] text-muted-foreground/50">·</span>
+                      <p className="text-[10px] text-muted-foreground">
+                        {active.messages.length} stored messages
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -432,7 +437,11 @@ export function InboxContent({
               </div>
 
               {/* Messages */}
-              <ScrollArea className="min-h-0 flex-1 px-4 py-4">
+              <div
+                ref={messageViewportRef}
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4"
+                aria-label="Stored conversation history"
+              >
                 {active.messages.length === 0 ? (
                   <div className="h-full min-h-32 flex items-center justify-center text-xs text-muted-foreground">
                     No stored messages in this conversation.
@@ -442,10 +451,9 @@ export function InboxContent({
                     {active.messages.map((message) => (
                       <MessageBubble key={message.id} message={message} />
                     ))}
-                    <div ref={messageEndRef} aria-hidden="true" />
                   </div>
                 )}
-              </ScrollArea>
+              </div>
 
               {/* Channel warning */}
               {!data.whatsappConnected && (
