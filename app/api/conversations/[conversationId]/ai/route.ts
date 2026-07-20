@@ -109,7 +109,11 @@ export async function POST(
   try {
     const result = await runConversationAssistant({
       action,
-      messages: messagesResult.data ?? [],
+      messages: (messagesResult.data ?? []).map((message) => ({
+        direction: message.direction,
+        senderType: message.sender_type,
+        textBody: message.text_body,
+      })),
     })
     return NextResponse.json({ status: "completed", action, ...result })
   } catch (error) {
