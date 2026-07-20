@@ -5,6 +5,30 @@ import type {
 
 type JsonRecord = Record<string, unknown>
 
+export type MetaWhatsAppWebhookDiagnostics = {
+  recognizedObject: boolean
+  entries: number
+  invalidEntries: number
+  changes: number
+  invalidChanges: number
+  messageFieldChanges: number
+  ignoredNonMessageChanges: number
+  changesMissingValue: number
+  changesMissingPhoneNumberId: number
+  messageObjects: number
+  statusObjects: number
+  parsedInboundTexts: number
+  parsedDeliveryStatuses: number
+  ignoredUnsupportedMessages: number
+  ignoredMalformedMessages: number
+  ignoredMalformedStatuses: number
+}
+
+type MetaWhatsAppWebhookAnalysis = {
+  events: ProviderWebhookEvent[]
+  diagnostics: MetaWhatsAppWebhookDiagnostics
+}
+
 function record(value: unknown): JsonRecord | null {
   return value !== null && typeof value === "object" && !Array.isArray(value)
     ? value as JsonRecord
@@ -42,40 +66,99 @@ function isDeliveryStatus(value: string): value is ProviderDeliveryStatus {
   return value === "sent" || value === "delivered" || value === "read" || value === "failed"
 }
 
-export function parseMetaWhatsAppWebhook(payload: unknown): ProviderWebhookEvent[] {
-  const root = record(payload)
-  if (root?.object !== "whatsapp_business_account") return []
+function createDiagnostics(recognizedObject: boolean): MetaWhatsAppWebhookDiagnostics {
+  return {
+    recognizedObject,
+    entries: 0,
+    invalidEntries: 0,
+    changes: 0,
+    invalidChanges: 0,
+    messageFieldChanges: 0,
+    ignoredNonMessageChanges: 0,
+    changesMissingValue: 0,
+    changesMissingPhoneNumberId: 0,
+    messageObjects: 0,
+    statusObjects: 0,
+    parsedInboundTexts: 0,
+    parsedDeliveryStatuses: 0,
+    ignoredUnsupportedMessages: 0,
+    ignoredMalformedMessages: 0,
+    ignoredMalformedStatuses: 0,
+  }
+}
 
+function analyzeMetaWhatsAppWebhook(payload: unknown): MetaWhatsAppWebhookAnalysis {
+  const root = record(payload)
+  const recognizedObject = root?.object === "whatsapp_business_account"
+  const diagnostics = createDiagnostics(recognizedObject)
   const events: ProviderWebhookEvent[] = []
 
-  for (const entryValue of array(root.entry)) {
+  if (!recognizedObject || !root) return { events, diagnostics }
+
+  const entries = array(root.entry)
+  diagnostics.entries = entries.length
+
+  for (const entryValue of entries) {
     const entry = record(entryValue)
-    if (!entry) continue
+    if (!entry) {
+      diagnostics.invalidEntries += 1
+      continue
+    }
 
-    for (const changeValue of array(entry.changes)) {
+    const changes = array(entry.changes)
+    diagnostics.changes += changes.length
+
+    for (const changeValue of changes) {
       const change = record(changeValue)
-      const value = record(change?.value)
-      const metadata = record(value?.metadata)
-      const externalRecipientId = nonBlankString(metadata?.phone_number_id)
+      if (!change) {
+        diagnostics.invalidChanges += 1
+        continue
+      }
 
-      if (change?.field !== "messages" || !value || !externalRecipientId) continue
+      if (change.field !== "messages") {
+        diagnostics.ignoredNonMessageChanges += 1
+        continue
+      }
+
+      diagnostics.messageFieldChanges += 1
+      const value = record(change.value)
+      if (!value) {
+        diagnostics.changesMissingValue += 1
+        continue
+      }
+
+      const metadata = record(value.metadata)
+      const externalRecipientId = nonBlankString(metadata?.phone_number_id)
+      if (!externalRecipientId) {
+        diagnostics.changesMissingPhoneNumberId += 1
+        continue
+      }
 
       const contacts = array(value.contacts)
-      for (const messageValue of array(value.messages)) {
+      const messages = array(value.messages)
+      diagnostics.messageObjects += messages.length
+
+      for (const messageValue of messages) {
         const message = record(messageValue)
-        const text = record(message?.text)
-        const externalMessageId = nonBlankString(message?.id)
-        const senderExternalId = nonBlankString(message?.from)
-        const occurredAt = providerDate(message?.timestamp)
+        if (!message) {
+          diagnostics.ignoredMalformedMessages += 1
+          continue
+        }
+
+        if (message.type !== "text") {
+          if (nonBlankString(message.type)) diagnostics.ignoredUnsupportedMessages += 1
+          else diagnostics.ignoredMalformedMessages += 1
+          continue
+        }
+
+        const text = record(message.text)
+        const externalMessageId = nonBlankString(message.id)
+        const senderExternalId = nonBlankString(message.from)
+        const occurredAt = providerDate(message.timestamp)
         const body = typeof text?.body === "string" ? text.body : null
 
-        if (
-          message?.type !== "text"
-          || !externalMessageId
-          || !senderExternalId
-          || !occurredAt
-          || body === null
-        ) {
+        if (!externalMessageId || !senderExternalId || !occurredAt || body === null) {
+          diagnostics.ignoredMalformedMessages += 1
           continue
         }
 
@@ -89,15 +172,22 @@ export function parseMetaWhatsAppWebhook(payload: unknown): ProviderWebhookEvent
           text: body,
           occurredAt,
         })
+        diagnostics.parsedInboundTexts += 1
       }
 
-      for (const statusValue of array(value.statuses)) {
+      const statuses = array(value.statuses)
+      diagnostics.statusObjects += statuses.length
+
+      for (const statusValue of statuses) {
         const statusRecord = record(statusValue)
         const externalMessageId = nonBlankString(statusRecord?.id)
         const status = nonBlankString(statusRecord?.status)
         const occurredAt = providerDate(statusRecord?.timestamp)
 
-        if (!externalMessageId || !status || !isDeliveryStatus(status) || !occurredAt) continue
+        if (!externalMessageId || !status || !isDeliveryStatus(status) || !occurredAt) {
+          diagnostics.ignoredMalformedStatuses += 1
+          continue
+        }
 
         events.push({
           kind: "delivery_status",
@@ -106,9 +196,18 @@ export function parseMetaWhatsAppWebhook(payload: unknown): ProviderWebhookEvent
           status,
           occurredAt,
         })
+        diagnostics.parsedDeliveryStatuses += 1
       }
     }
   }
 
-  return events
+  return { events, diagnostics }
+}
+
+export function diagnoseMetaWhatsAppWebhook(payload: unknown): MetaWhatsAppWebhookDiagnostics {
+  return analyzeMetaWhatsAppWebhook(payload).diagnostics
+}
+
+export function parseMetaWhatsAppWebhook(payload: unknown): ProviderWebhookEvent[] {
+  return analyzeMetaWhatsAppWebhook(payload).events
 }
