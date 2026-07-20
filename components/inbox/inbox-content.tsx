@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
@@ -251,6 +251,7 @@ export function InboxContent({
   const [draft, setDraft] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
+  const messageEndRef = useRef<HTMLDivElement>(null)
 
   function selectConversation(conversationId: string) {
     setActiveId(conversationId)
@@ -313,6 +314,14 @@ export function InboxContent({
 
   const active = data.conversations.find((c) => c.id === activeId) ?? filtered[0] ?? null
 
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      messageEndRef.current?.scrollIntoView({ block: "end" })
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [active?.id, active?.messages.length])
+
   if (data.conversations.length === 0) {
     return (
       <>
@@ -340,9 +349,9 @@ export function InboxContent({
   return (
     <>
       <AitHeader title="Inbox" subtitle="Organization-scoped conversations and messages." />
-      <div className="flex rounded-xl border border-border/60 bg-card overflow-hidden" style={{ height: "calc(100vh - 10rem)" }}>
+      <div className="flex min-h-0 rounded-xl border border-border/60 bg-card overflow-hidden" style={{ height: "calc(100vh - 10rem)" }}>
         {/* Conversation list */}
-        <div className="w-72 xl:w-80 flex-shrink-0 flex flex-col border-r border-border/60">
+        <div className="w-72 xl:w-80 min-h-0 flex-shrink-0 flex flex-col border-r border-border/60">
           <div className="p-3 border-b border-border/60 space-y-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -370,7 +379,7 @@ export function InboxContent({
               ))}
             </div>
           </div>
-          <ScrollArea className="flex-1">
+          <ScrollArea className="min-h-0 flex-1">
             {filtered.length === 0 ? (
               <div className="p-6 text-center text-xs text-muted-foreground">
                 No conversations match this filter.
@@ -391,7 +400,7 @@ export function InboxContent({
         {/* Thread + customer panel */}
         {active ? (
           <>
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 min-h-0 flex flex-col min-w-0">
               {/* Thread header */}
               <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border/60 flex-shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
@@ -423,7 +432,7 @@ export function InboxContent({
               </div>
 
               {/* Messages */}
-              <ScrollArea className="flex-1 px-4 py-4">
+              <ScrollArea className="min-h-0 flex-1 px-4 py-4">
                 {active.messages.length === 0 ? (
                   <div className="h-full min-h-32 flex items-center justify-center text-xs text-muted-foreground">
                     No stored messages in this conversation.
@@ -433,6 +442,7 @@ export function InboxContent({
                     {active.messages.map((message) => (
                       <MessageBubble key={message.id} message={message} />
                     ))}
+                    <div ref={messageEndRef} aria-hidden="true" />
                   </div>
                 )}
               </ScrollArea>
