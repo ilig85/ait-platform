@@ -28,6 +28,8 @@ export interface WebhookMessageStore {
 
 export type WebhookProcessingResult = {
   received: number
+  inboundTextsReceived: number
+  deliveryStatusesReceived: number
   created: number
   duplicates: number
   statusesAdvanced: number
@@ -43,6 +45,8 @@ export async function processProviderWebhook(
   const connectionCache = new Map<string, MessagingConnectionContext | null>()
   const result: WebhookProcessingResult = {
     received: events.length,
+    inboundTextsReceived: 0,
+    deliveryStatusesReceived: 0,
     created: 0,
     duplicates: 0,
     statusesAdvanced: 0,
@@ -62,6 +66,9 @@ export async function processProviderWebhook(
   }
 
   for (const event of events) {
+    if (event.kind === "inbound_text") result.inboundTextsReceived += 1
+    else result.deliveryStatusesReceived += 1
+
     const connection = await connectionFor(event)
 
     if (!connection) {
