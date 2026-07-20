@@ -12,18 +12,24 @@ payment method is required for business-initiated messages.
 
 ## One-time AIT platform configuration
 
-1. Complete Meta Business Verification and Access Verification for AIT.
-2. In the AIT Meta app, request Advanced Access for
+1. In the AIT app dashboard, open **Use cases → Connect with customers through
+   WhatsApp → Customize**. In **Quickstart** (or **Become a Partner**), expand
+   **Become a Tech Provider** and complete **Start/Continue onboarding**. Select
+   the AIT business portfolio and accept the required WhatsApp terms.
+2. Complete Meta Business Verification and Access Verification for AIT.
+3. In the AIT Meta app, request Advanced Access for
    `whatsapp_business_management` and `whatsapp_business_messaging`.
-3. Create a Facebook Login for Business configuration for WhatsApp Embedded
-   Signup. Use the standard Cloud API flow, not WhatsApp Business App
-   Coexistence, for the first production release.
-4. Add the stable production domain to the app's allowed domains and allowed
+4. Return to **Facebook Login for Business → Configurations** and create a new
+   configuration. The **WhatsApp Embedded Signup** login variation should now
+   be available. Do not create a **General** configuration. Use the standard
+   Cloud API flow, not WhatsApp Business App Coexistence, for the first
+   production release.
+5. Add the stable production domain to the app's allowed domains and allowed
    JavaScript SDK domains.
-5. Keep the existing callback URL:
+6. Keep the existing callback URL:
    `https://tasko-modern-task-management-3e.vercel.app/api/webhooks/meta/whatsapp`.
-6. Keep the `messages` webhook field subscribed.
-7. Add the environment variables below to Vercel Production and Preview, then
+7. Keep the `messages` webhook field subscribed.
+8. Add the environment variables below to Vercel Production and Preview, then
    redeploy.
 
 ## Required Vercel environment variables
