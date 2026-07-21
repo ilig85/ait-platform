@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea"
 import type { InboxConversation, InboxData, InboxMessage } from "@/lib/data/models"
 import { AitHeader } from "@/components/ait/header"
 import { useI18n } from "@/lib/i18n"
+import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 
 type Filter = "all" | "unread" | "needs_human" | "open" | "pending" | "resolved" | "archived"
@@ -286,6 +287,61 @@ export function InboxContent({
   const [aiError, setAiError] = useState<string | null>(null)
   const [isUpdatingAiConsent, setIsUpdatingAiConsent] = useState(false)
   const messageViewportRef = useRef<HTMLDivElement>(null)
+  const refreshTimerRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    const supabase = createBrowserClient()
+
+    const refreshInbox = () => {
+      if (document.visibilityState !== "visible") return
+      if (refreshTimerRef.current !== null) {
+        window.clearTimeout(refreshTimerRef.current)
+      }
+      refreshTimerRef.current = window.setTimeout(() => {
+        refreshTimerRef.current = null
+        router.refresh()
+      }, 250)
+    }
+
+    const organizationFilter = `organization_id=eq.${data.organizationId}`
+    const channel = supabase
+      .channel(`inbox:${data.organizationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: organizationFilter,
+        },
+        refreshInbox,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "conversations",
+          filter: organizationFilter,
+        },
+        refreshInbox,
+      )
+      .subscribe()
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") refreshInbox()
+    }
+    document.addEventListener("visibilitychange", refreshWhenVisible)
+
+    return () => {
+      document.removeEventListener("visibilitychange", refreshWhenVisible)
+      if (refreshTimerRef.current !== null) {
+        window.clearTimeout(refreshTimerRef.current)
+        refreshTimerRef.current = null
+      }
+      void supabase.removeChannel(channel)
+    }
+  }, [data.organizationId, router])
 
   function selectConversation(conversationId: string) {
     setActiveId(conversationId)
