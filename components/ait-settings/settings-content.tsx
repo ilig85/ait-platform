@@ -2,12 +2,16 @@
 
 import { useState } from "react"
 import {
+  AlertCircle,
+  Bot,
   BrainCircuit,
   Building2,
   CheckCircle2,
   Clock,
   Globe,
   Info,
+  Loader2,
+  PenLine,
   Smartphone,
   Users,
   XCircle,
@@ -34,6 +38,56 @@ export function AitSettingsContent({
   metaEmbeddedSignupConfigurationId: string | null
 }) {
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("business")
+  const [responseMode, setResponseMode] = useState<"draft" | "auto">(
+    data.aiSettings.responseMode,
+  )
+  const [isSavingAiMode, setIsSavingAiMode] = useState(false)
+  const [aiModeMessage, setAiModeMessage] = useState<{
+    kind: "success" | "error"
+    text: string
+  } | null>(null)
+
+  async function saveResponseMode(nextMode: "draft" | "auto") {
+    if (
+      data.role !== "owner"
+      || !data.aiSettings.available
+      || isSavingAiMode
+      || nextMode === responseMode
+    ) return
+
+    setIsSavingAiMode(true)
+    setAiModeMessage(null)
+    try {
+      const response = await fetch("/api/settings/ai-response-mode", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ responseMode: nextMode }),
+      })
+      const payload = await response.json().catch(() => null) as { message?: string } | null
+      if (!response.ok) {
+        setAiModeMessage({
+          kind: "error",
+          text: payload?.message ?? "AIT could not save the AI response mode.",
+        })
+        return
+      }
+
+      setResponseMode(nextMode)
+      setAiModeMessage({
+        kind: "success",
+        text: nextMode === "auto"
+          ? "Automatic replies are enabled for eligible conversations."
+          : "AI will prepare drafts for manager review.",
+      })
+    } catch {
+      setAiModeMessage({
+        kind: "error",
+        text: "AIT could not reach the server. Check your connection and try again.",
+      })
+    } finally {
+      setIsSavingAiMode(false)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
@@ -92,11 +146,90 @@ export function AitSettingsContent({
       )}
 
       {tab === "ai" && (
-        <ComingSoon
-          icon={BrainCircuit}
-          title="AI behaviour is not configured yet"
-          description="The production schema has no AI settings or execution tables in this phase. No placeholder settings are being saved."
-        />
+        <div className="bg-card border border-border/60 rounded-xl p-5 flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <BrainCircuit className="w-4 h-4 text-[#2DE2B1]" />
+              <h2 className="text-sm font-semibold text-foreground">AI response mode</h2>
+            </div>
+            <Badge variant="outline" className="text-[10px] capitalize">
+              {responseMode === "auto" ? "Auto-send on" : "Manager review"}
+            </Badge>
+          </div>
+
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Choose whether AIT prepares an editable draft or sends only high-confidence replies automatically.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              type="button"
+              disabled={data.role !== "owner" || !data.aiSettings.available || isSavingAiMode}
+              onClick={() => void saveResponseMode("draft")}
+              className={cn(
+                "rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                responseMode === "draft"
+                  ? "border-[#2DE2B1] bg-[#2DE2B1]/8"
+                  : "border-border/60 hover:border-[#2DE2B1]/40",
+              )}
+            >
+              <PenLine className="w-5 h-5 text-[#2DE2B1] mb-3" />
+              <p className="text-sm font-semibold text-foreground">Draft for review</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                AI writes the reply. A manager edits or approves it before sending.
+              </p>
+            </button>
+
+            <button
+              type="button"
+              disabled={data.role !== "owner" || !data.aiSettings.available || isSavingAiMode}
+              onClick={() => void saveResponseMode("auto")}
+              className={cn(
+                "rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                responseMode === "auto"
+                  ? "border-[#2DE2B1] bg-[#2DE2B1]/8"
+                  : "border-border/60 hover:border-[#2DE2B1]/40",
+              )}
+            >
+              <Bot className="w-5 h-5 text-[#2DE2B1] mb-3" />
+              <p className="text-sm font-semibold text-foreground">Automatic replies</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                AI sends only when consent exists, WhatsApp allows a reply, and confidence is at least {Math.round(data.aiSettings.autoReplyMinConfidence * 100)}%.
+              </p>
+            </button>
+          </div>
+
+          <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-400/8 border border-amber-400/25">
+            <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Until business knowledge is connected, automatic sending is intentionally limited to greetings, acknowledgements, and facts already stated in the conversation. Product, price, stock, policy, or uncertain questions are sent to a manager.
+            </p>
+          </div>
+
+          {!data.aiSettings.available && (
+            <p className="text-xs text-destructive">
+              Apply the automatic-response Supabase migration before enabling this setting.
+            </p>
+          )}
+          {data.role !== "owner" && (
+            <p className="text-xs text-muted-foreground">
+              Only the organization owner can change automatic sending.
+            </p>
+          )}
+          {isSavingAiMode && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving response mode…
+            </p>
+          )}
+          {aiModeMessage && (
+            <p className={cn(
+              "text-xs",
+              aiModeMessage.kind === "error" ? "text-destructive" : "text-[#168e70]",
+            )}>
+              {aiModeMessage.text}
+            </p>
+          )}
+        </div>
       )}
 
       {tab === "team" && (
