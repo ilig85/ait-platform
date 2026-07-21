@@ -168,6 +168,11 @@ export type SettingsData = {
   organization: WorkspaceOrganization
   role: Enums<"organization_member_role">
   organizationCount: number
+  aiSettings: {
+    available: boolean
+    responseMode: "draft" | "auto"
+    autoReplyMinConfidence: number
+  }
   channels: Array<
     ChannelSummary & {
       metaConfigurationVisible: boolean

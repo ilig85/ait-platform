@@ -49,7 +49,11 @@ export class SupabaseWebhookMessageStore implements WebhookMessageStore {
     }
   }
 
-  async recordInboundText(message: InboundTextWrite): Promise<{ created: boolean }> {
+  async recordInboundText(message: InboundTextWrite): Promise<{
+    created: boolean
+    messageId: string
+    conversationId: string
+  }> {
     const result = await this.admin.rpc("ait_record_inbound_text", {
       target_organization_id: message.connection.organizationId,
       target_channel_connection_id: message.connection.id,
@@ -64,7 +68,11 @@ export class SupabaseWebhookMessageStore implements WebhookMessageStore {
     if (result.error) throw result.error
     const firstResult = result.data?.[0]
     if (!firstResult) throw new Error("Inbound message recorder returned no result")
-    return { created: firstResult.created }
+    return {
+      created: firstResult.created,
+      messageId: firstResult.message_id,
+      conversationId: firstResult.conversation_id,
+    }
   }
 
   async advanceDeliveryStatus(input: Parameters<WebhookMessageStore["advanceDeliveryStatus"]>[0]) {

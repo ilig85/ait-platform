@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto"
-import { NextResponse } from "next/server"
-import { createMetaWebhookAdapter } from "@/lib/messaging/meta/adapter"
+import { after, NextResponse } from "next/server"
+import { processAutomaticReply } from "@/lib/ai/automatic-reply"
+import {
+  createMetaOutboundAdapter,
+  createMetaWebhookAdapter,
+} from "@/lib/messaging/meta/adapter"
 import { diagnoseMetaWhatsAppWebhook } from "@/lib/messaging/meta/webhook-parser"
 import { requiredServerEnv, verifyWebhookChallenge } from "@/lib/messaging/security"
 import { SupabaseWebhookMessageStore } from "@/lib/messaging/supabase-stores"
@@ -138,6 +142,33 @@ export async function POST(request: Request) {
       adapter,
       payload,
       new SupabaseWebhookMessageStore(createAdminClient()),
+      {
+        onInboundTextRecorded: (candidate) => {
+          after(async () => {
+            try {
+              const automaticReply = await processAutomaticReply({
+                admin: createAdminClient(),
+                adapter: createMetaOutboundAdapter(),
+                connection: candidate.connection,
+                inboundMessageId: candidate.messageId,
+                conversationId: candidate.conversationId,
+              })
+              console.info("ait.automatic_reply", {
+                diagnosticId,
+                outcome: automaticReply.status,
+                confidence: automaticReply.confidence,
+                category: automaticReply.category,
+              })
+            } catch (error) {
+              console.error("ait.automatic_reply", {
+                diagnosticId,
+                outcome: "processing_failed",
+                ...safeErrorMetadata(error),
+              })
+            }
+          })
+        },
+      },
     )
     const outcome = successfulOutcome(result)
     logWebhook("info", diagnosticId, outcome, startedAt, {

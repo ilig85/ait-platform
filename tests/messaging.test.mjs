@@ -115,24 +115,37 @@ test("missing, malformed, and invalid Meta HMAC signatures are rejected", () => 
 test("duplicate inbound provider IDs do not apply conversation effects twice", async () => {
   const seenMessageIds = new Set()
   let conversationEffects = 0
+  const automaticReplyCandidates = []
   const store = {
     resolveConnection: async () => connection(),
     recordInboundText: async (message) => {
       const created = !seenMessageIds.has(message.externalMessageId)
       seenMessageIds.add(message.externalMessageId)
       if (created) conversationEffects += 1
-      return { created }
+      return {
+        created,
+        messageId: "message-local-1",
+        conversationId: "conversation-1",
+      }
     },
     advanceDeliveryStatus: async () => ({ advanced: false }),
   }
   const adapter = fakeAdapter([inboundEvent()])
 
-  const first = await processProviderWebhook(adapter, {}, store)
-  const duplicate = await processProviderWebhook(adapter, {}, store)
+  const hooks = {
+    onInboundTextRecorded: (candidate) => automaticReplyCandidates.push(candidate),
+  }
+  const first = await processProviderWebhook(adapter, {}, store, hooks)
+  const duplicate = await processProviderWebhook(adapter, {}, store, hooks)
 
   assert.equal(first.created, 1)
   assert.equal(duplicate.duplicates, 1)
   assert.equal(conversationEffects, 1)
+  assert.deepEqual(automaticReplyCandidates, [{
+    connection: connection(),
+    messageId: "message-local-1",
+    conversationId: "conversation-1",
+  }])
 })
 
 test("organization scope comes only from the trusted phone-number mapping", async () => {
@@ -145,7 +158,11 @@ test("organization scope comes only from the trusted phone-number mapping", asyn
     },
     recordInboundText: async (message) => {
       recordedOrganizationId = message.connection.organizationId
-      return { created: true }
+      return {
+        created: true,
+        messageId: "message-local-2",
+        conversationId: "conversation-2",
+      }
     },
     advanceDeliveryStatus: async () => ({ advanced: false }),
   }
