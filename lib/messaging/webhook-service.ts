@@ -17,7 +17,11 @@ export type InboundTextWrite = {
 
 export interface WebhookMessageStore {
   resolveConnection(externalRecipientId: string): Promise<MessagingConnectionContext | null>
-  recordInboundText(message: InboundTextWrite): Promise<{ created: boolean }>
+  recordInboundText(message: InboundTextWrite): Promise<{
+    created: boolean
+    messageId: string
+    conversationId: string
+  }>
   advanceDeliveryStatus(input: {
     connection: MessagingConnectionContext
     externalMessageId: string
@@ -40,6 +44,13 @@ export async function processProviderWebhook(
   adapter: MessagingProviderAdapter,
   payload: unknown,
   store: WebhookMessageStore,
+  hooks: {
+    onInboundTextRecorded?: (input: {
+      connection: MessagingConnectionContext
+      messageId: string
+      conversationId: string
+    }) => void
+  } = {},
 ): Promise<WebhookProcessingResult> {
   const events = adapter.parseWebhook(payload)
   const connectionCache = new Map<string, MessagingConnectionContext | null>()
@@ -87,8 +98,16 @@ export async function processProviderWebhook(
         occurredAt: event.occurredAt,
       })
 
-      if (writeResult.created) result.created += 1
-      else result.duplicates += 1
+      if (writeResult.created) {
+        result.created += 1
+        hooks.onInboundTextRecorded?.({
+          connection,
+          messageId: writeResult.messageId,
+          conversationId: writeResult.conversationId,
+        })
+      } else {
+        result.duplicates += 1
+      }
       continue
     }
 
