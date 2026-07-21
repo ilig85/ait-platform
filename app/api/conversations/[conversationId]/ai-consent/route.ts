@@ -86,11 +86,32 @@ export async function PATCH(
   }
 
   async function recordConsent() {
+    const existingResult = await supabase
+      .from("customer_consents")
+      .select("id")
+      .eq("organization_id", consent.organization_id)
+      .eq("contact_id", consent.contact_id)
+      .eq("consent_type", consent.consent_type)
+      .eq("topic", consent.topic)
+      .maybeSingle()
+
+    if (existingResult.error) return existingResult
+
+    if (existingResult.data) {
+      return supabase
+        .from("customer_consents")
+        .update({
+          status: consent.status,
+          source: consent.source,
+          consented_at: consent.consented_at,
+          revoked_at: consent.revoked_at,
+        })
+        .eq("id", existingResult.data.id)
+    }
+
     return supabase
       .from("customer_consents")
-      .upsert(consent, {
-        onConflict: "organization_id,contact_id,consent_type,topic",
-      })
+      .insert(consent)
   }
 
   async function updateContact() {
