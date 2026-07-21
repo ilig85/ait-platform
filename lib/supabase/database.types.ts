@@ -134,6 +134,29 @@ export type Database = {
           updated_at?: string
         }
       >
+      organization_knowledge: TableDefinition<
+        {
+          organization_id: string
+          content: string
+          updated_by: string | null
+          created_at: string
+          updated_at: string
+        },
+        {
+          organization_id: string
+          content?: string
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        },
+        {
+          organization_id?: string
+          content?: string
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      >
       organization_members: TableDefinition<
         {
           id: string
