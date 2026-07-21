@@ -6,8 +6,11 @@ import { useRouter } from "next/navigation"
 import {
   AlertCircle,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock,
   FileText,
+  GripHorizontal,
   Info,
   Loader2,
   MessageSquare,
@@ -279,6 +282,7 @@ export function InboxContent({
   const [sendError, setSendError] = useState<string | null>(null)
   const [aiAction, setAiAction] = useState<"summary" | "draft" | null>(null)
   const [aiSummary, setAiSummary] = useState<string | null>(null)
+  const [summaryCollapsed, setSummaryCollapsed] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
   const [isUpdatingAiConsent, setIsUpdatingAiConsent] = useState(false)
   const messageViewportRef = useRef<HTMLDivElement>(null)
@@ -288,6 +292,7 @@ export function InboxContent({
     setDraft("")
     setSendError(null)
     setAiSummary(null)
+    setSummaryCollapsed(false)
     setAiError(null)
   }
 
@@ -351,6 +356,7 @@ export function InboxContent({
 
       if (action === "summary") {
         setAiSummary(payload.text)
+        setSummaryCollapsed(false)
       } else {
         setDraft(payload.text)
       }
@@ -505,8 +511,9 @@ export function InboxContent({
           <>
             <div className="flex-1 min-h-0 flex flex-col min-w-0">
               {/* Thread header */}
-              <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border/60 flex-shrink-0">
-                <div className="flex items-center gap-3 min-w-0">
+              <div className="px-4 py-3 border-b border-border/60 flex-shrink-0 space-y-2">
+                <div className="flex items-center justify-between gap-3 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-full bg-[#2DE2B1]/15 text-[#102223] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                     {active.contactName.slice(0, 2).toUpperCase()}
                   </div>
@@ -526,8 +533,18 @@ export function InboxContent({
                       </p>
                     </div>
                   </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0 flex-shrink-0 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowCustomerPanel((v) => !v)}
+                    aria-label="Toggle contact panel"
+                  >
+                    <Users className="w-4 h-4" />
+                  </Button>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <Button
                     type="button"
                     size="sm"
@@ -561,27 +578,49 @@ export function InboxContent({
                       : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
                     Draft reply
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowCustomerPanel((v) => !v)}
-                    aria-label="Toggle contact panel"
-                  >
-                    <Users className="w-4 h-4" />
-                  </Button>
                 </div>
               </div>
 
               {aiSummary && (
-                <div className="mx-4 mt-3 rounded-lg border border-[#2DE2B1]/25 bg-[#2DE2B1]/7 p-3 flex-shrink-0">
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#2DE2B1]" />
-                    <p className="text-xs font-semibold text-foreground">AI conversation summary</p>
+                <div
+                  className={cn(
+                    "mx-4 mt-3 rounded-lg border border-[#2DE2B1]/25 bg-[#2DE2B1]/7 flex-shrink-0",
+                    !summaryCollapsed && "resize-y overflow-auto",
+                  )}
+                  style={summaryCollapsed ? undefined : {
+                    height: "10rem",
+                    minHeight: "7rem",
+                    maxHeight: "45vh",
+                  }}
+                >
+                  <div className="sticky top-0 flex items-center justify-between gap-2 px-3 py-2 bg-[#eafaf5] dark:bg-[#12302d] border-b border-[#2DE2B1]/15">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Sparkles className="w-3.5 h-3.5 text-[#2DE2B1] flex-shrink-0" />
+                      <p className="text-xs font-semibold text-foreground truncate">AI conversation summary</p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0 flex-shrink-0"
+                      onClick={() => setSummaryCollapsed((value) => !value)}
+                      aria-label={summaryCollapsed ? "Expand summary" : "Collapse summary"}
+                    >
+                      {summaryCollapsed
+                        ? <ChevronDown className="w-3.5 h-3.5" />
+                        : <ChevronUp className="w-3.5 h-3.5" />}
+                    </Button>
                   </div>
-                  <p className="text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap max-h-36 overflow-y-auto">
-                    {aiSummary}
-                  </p>
+                  {!summaryCollapsed && (
+                    <>
+                      <p className="px-3 py-2 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                        {aiSummary}
+                      </p>
+                      <div className="sticky bottom-0 flex items-center justify-center h-4 bg-gradient-to-t from-background/80 to-transparent pointer-events-none">
+                        <GripHorizontal className="w-4 h-4 text-muted-foreground/45" />
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
