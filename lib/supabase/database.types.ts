@@ -111,6 +111,29 @@ export type Database = {
           updated_at?: string
         }
       >
+      organization_ai_settings: TableDefinition<
+        {
+          organization_id: string
+          response_mode: "draft" | "auto"
+          auto_reply_min_confidence: number
+          created_at: string
+          updated_at: string
+        },
+        {
+          organization_id: string
+          response_mode?: "draft" | "auto"
+          auto_reply_min_confidence?: number
+          created_at?: string
+          updated_at?: string
+        },
+        {
+          organization_id?: string
+          response_mode?: "draft" | "auto"
+          auto_reply_min_confidence?: number
+          created_at?: string
+          updated_at?: string
+        }
+      >
       organization_members: TableDefinition<
         {
           id: string
