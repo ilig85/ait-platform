@@ -122,7 +122,11 @@ test("processing counters distinguish inbound text from delivery-status events",
   }
   const store = {
     resolveConnection: async () => connection,
-    recordInboundText: async () => ({ created: true }),
+    recordInboundText: async () => ({
+      created: true,
+      messageId: "message-local-1",
+      conversationId: "conversation-private",
+    }),
     advanceDeliveryStatus: async () => ({ advanced: false }),
   }
 
