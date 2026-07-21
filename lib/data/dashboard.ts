@@ -310,6 +310,7 @@ export async function getInboxData(): Promise<Loadable<InboxData>> {
   return {
     status: "ready",
     data: {
+      organizationId,
       conversations,
       whatsappConnected: (channelsResult.data ?? []).some(
         (channel) => channel.channel_type === "whatsapp" && channel.status === "connected",

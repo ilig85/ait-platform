@@ -139,6 +139,7 @@ export type InboxConversation = {
 }
 
 export type InboxData = {
+  organizationId: string
   conversations: InboxConversation[]
   whatsappConnected: boolean
 }
