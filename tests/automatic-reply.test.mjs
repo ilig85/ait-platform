@@ -41,4 +41,8 @@ test("the confidence gate blocks uncertain or unsafe automatic replies", () => {
     false,
   )
   assert.equal(shouldSendAutomaticReply({ ...safe, reply: "" }, 0.9), false)
+  assert.equal(
+    shouldSendAutomaticReply({ ...safe, category: "knowledge_fact" }, 0.9),
+    true,
+  )
 })
