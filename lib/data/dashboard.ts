@@ -372,13 +372,24 @@ export async function getSettingsData(): Promise<Loadable<SettingsData>> {
 
   const supabase = await createClient()
   const organizationId = workspace.organization.id
-  const channelsResult = await supabase
-    .from("channel_connections")
-    .select("id, channel_type, provider, display_name, status, connected_phone_number, connected_at, last_error")
-    .eq("organization_id", organizationId)
-    .order("created_at", { ascending: true })
+  const [channelsResult, aiSettingsResult] = await Promise.all([
+    supabase
+      .from("channel_connections")
+      .select("id, channel_type, provider, display_name, status, connected_phone_number, connected_at, last_error")
+      .eq("organization_id", organizationId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("organization_ai_settings")
+      .select("response_mode, auto_reply_min_confidence")
+      .eq("organization_id", organizationId)
+      .maybeSingle(),
+  ])
 
-  const failed = queryError<SettingsData>("settings", [channelsResult.error])
+  const aiSettingsUnavailable = aiSettingsResult.error?.code === "42P01"
+  const failed = queryError<SettingsData>("settings", [
+    channelsResult.error,
+    aiSettingsUnavailable ? null : aiSettingsResult.error,
+  ])
   if (failed) return failed
 
   const selectedChannelIds = (channelsResult.data ?? []).map((channel) => channel.id)
@@ -402,6 +413,11 @@ export async function getSettingsData(): Promise<Loadable<SettingsData>> {
       organization: workspace.organization,
       role: workspace.role,
       organizationCount: workspace.organizationCount,
+      aiSettings: {
+        available: !aiSettingsUnavailable,
+        responseMode: aiSettingsResult.data?.response_mode === "auto" ? "auto" : "draft",
+        autoReplyMinConfidence: Number(aiSettingsResult.data?.auto_reply_min_confidence ?? 0.9),
+      },
       channels: (channelsResult.data ?? []).map((channel) => {
         const meta = metaByConnection.get(channel.id)
         return {
