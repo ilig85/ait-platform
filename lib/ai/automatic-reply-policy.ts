@@ -2,6 +2,7 @@ export const AUTOMATIC_REPLY_CATEGORIES = [
   "greeting",
   "acknowledgement",
   "conversation_fact",
+  "knowledge_fact",
   "needs_human",
 ] as const
 
@@ -20,6 +21,7 @@ const SAFE_REPLY_CATEGORIES = new Set<AutomaticReplyCategory>([
   "greeting",
   "acknowledgement",
   "conversation_fact",
+  "knowledge_fact",
 ])
 
 export function parseAutomaticReplyDecision(value: string): AutomaticReplyDecision | null {
