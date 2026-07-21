@@ -7,11 +7,13 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
+  FileText,
   Info,
   Loader2,
   MessageSquare,
   Search,
   Send,
+  Sparkles,
   Users,
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -196,7 +198,15 @@ function MessageBubble({ message }: { message: InboxMessage }) {
   )
 }
 
-function CustomerPanel({ conversation }: { conversation: InboxConversation }) {
+function CustomerPanel({
+  conversation,
+  isUpdatingAiConsent,
+  onChangeAiConsent,
+}: {
+  conversation: InboxConversation
+  isUpdatingAiConsent: boolean
+  onChangeAiConsent: (allowed: boolean) => void
+}) {
   return (
     <aside className="w-64 xl:w-72 flex-shrink-0 border-l border-border/60 bg-sidebar overflow-y-auto">
       <div className="p-4 border-b border-border/60">
@@ -223,6 +233,22 @@ function CustomerPanel({ conversation }: { conversation: InboxConversation }) {
             <p className="text-sidebar-foreground font-medium capitalize">{value}</p>
           </div>
         ))}
+      </div>
+      <div className="p-4 border-t border-border/60">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="w-full text-xs"
+          disabled={isUpdatingAiConsent}
+          onClick={() => onChangeAiConsent(!conversation.aiAnalysisAllowed)}
+        >
+          {isUpdatingAiConsent && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
+          {conversation.aiAnalysisAllowed ? "Disable AI analysis" : "Record consent & enable AI"}
+        </Button>
+        <p className="mt-2 text-[10px] leading-relaxed text-sidebar-foreground/40">
+          Enable AI only after the customer has agreed to conversation analysis.
+        </p>
       </div>
     </aside>
   )
@@ -251,12 +277,88 @@ export function InboxContent({
   const [draft, setDraft] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
-  const messageEndRef = useRef<HTMLDivElement>(null)
+  const [aiAction, setAiAction] = useState<"summary" | "draft" | null>(null)
+  const [aiSummary, setAiSummary] = useState<string | null>(null)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [isUpdatingAiConsent, setIsUpdatingAiConsent] = useState(false)
+  const messageViewportRef = useRef<HTMLDivElement>(null)
 
   function selectConversation(conversationId: string) {
     setActiveId(conversationId)
     setDraft("")
     setSendError(null)
+    setAiSummary(null)
+    setAiError(null)
+  }
+
+  async function updateAiConsent(allowed: boolean) {
+    if (!activeId || isUpdatingAiConsent) return
+
+    setIsUpdatingAiConsent(true)
+    setAiError(null)
+
+    try {
+      const response = await fetch(
+        `/api/conversations/${encodeURIComponent(activeId)}/ai-consent`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ allowed }),
+        },
+      )
+      const payload = await response.json().catch(() => null) as {
+        message?: string
+      } | null
+
+      if (!response.ok) {
+        setAiError(payload?.message ?? "AIT could not update the AI consent setting.")
+        return
+      }
+
+      if (!allowed) setAiSummary(null)
+      router.refresh()
+    } catch {
+      setAiError("AIT could not reach the server. Check your connection and try again.")
+    } finally {
+      setIsUpdatingAiConsent(false)
+    }
+  }
+
+  async function requestAi(action: "summary" | "draft") {
+    if (!activeId || aiAction) return
+
+    setAiAction(action)
+    setAiError(null)
+
+    try {
+      const response = await fetch(
+        `/api/conversations/${encodeURIComponent(activeId)}/ai`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action }),
+        },
+      )
+      const payload = await response.json().catch(() => null) as {
+        text?: string
+        message?: string
+      } | null
+
+      if (!response.ok || !payload?.text) {
+        setAiError(payload?.message ?? "AIT could not complete the AI request.")
+        return
+      }
+
+      if (action === "summary") {
+        setAiSummary(payload.text)
+      } else {
+        setDraft(payload.text)
+      }
+    } catch {
+      setAiError("AIT could not reach the server. Check your connection and try again.")
+    } finally {
+      setAiAction(null)
+    }
   }
 
   async function sendMessage() {
@@ -316,7 +418,8 @@ export function InboxContent({
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      messageEndRef.current?.scrollIntoView({ block: "end" })
+      const viewport = messageViewportRef.current
+      if (viewport) viewport.scrollTop = viewport.scrollHeight
     })
 
     return () => window.cancelAnimationFrame(frame)
@@ -417,22 +520,77 @@ export function InboxContent({
                       <p className="text-[10px] text-muted-foreground capitalize">
                         {statusFor(active).replace("_", " ")}
                       </p>
+                      <span className="text-[10px] text-muted-foreground/50">·</span>
+                      <p className="text-[10px] text-muted-foreground">
+                        {active.messages.length} stored messages
+                      </p>
                     </div>
                   </div>
                 </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowCustomerPanel((v) => !v)}
-                  aria-label="Toggle contact panel"
-                >
-                  <Users className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-2.5 text-xs"
+                    disabled={
+                      !active.aiAnalysisAllowed
+                      || active.messages.length === 0
+                      || aiAction !== null
+                    }
+                    onClick={() => void requestAi("summary")}
+                  >
+                    {aiAction === "summary"
+                      ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                      : <FileText className="w-3.5 h-3.5 mr-1.5" />}
+                    Summarize
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-8 px-2.5 text-xs bg-[#2DE2B1] text-[#071A1B] hover:bg-[#2DE2B1]/90"
+                    disabled={
+                      !active.aiAnalysisAllowed
+                      || active.messages.length === 0
+                      || aiAction !== null
+                    }
+                    onClick={() => void requestAi("draft")}
+                  >
+                    {aiAction === "draft"
+                      ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                      : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+                    Draft reply
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowCustomerPanel((v) => !v)}
+                    aria-label="Toggle contact panel"
+                  >
+                    <Users className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
 
+              {aiSummary && (
+                <div className="mx-4 mt-3 rounded-lg border border-[#2DE2B1]/25 bg-[#2DE2B1]/7 p-3 flex-shrink-0">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#2DE2B1]" />
+                    <p className="text-xs font-semibold text-foreground">AI conversation summary</p>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap max-h-36 overflow-y-auto">
+                    {aiSummary}
+                  </p>
+                </div>
+              )}
+
               {/* Messages */}
-              <ScrollArea className="min-h-0 flex-1 px-4 py-4">
+              <div
+                ref={messageViewportRef}
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4"
+                aria-label="Stored conversation history"
+              >
                 {active.messages.length === 0 ? (
                   <div className="h-full min-h-32 flex items-center justify-center text-xs text-muted-foreground">
                     No stored messages in this conversation.
@@ -442,10 +600,44 @@ export function InboxContent({
                     {active.messages.map((message) => (
                       <MessageBubble key={message.id} message={message} />
                     ))}
-                    <div ref={messageEndRef} aria-hidden="true" />
                   </div>
                 )}
-              </ScrollArea>
+              </div>
+
+              {aiError && (
+                <div className="px-4 pb-2">
+                  <Alert className="border-destructive/30 bg-destructive/5 py-2">
+                    <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                    <AlertDescription className="ml-1 text-xs text-destructive">
+                      {aiError}
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
+
+              {!active.aiAnalysisAllowed && (
+                <div className="px-4 pb-2">
+                  <Alert className="border-[#2DE2B1]/25 bg-[#2DE2B1]/5 py-2">
+                    <Sparkles className="h-3.5 w-3.5 text-[#2DE2B1]" />
+                    <AlertDescription className="ml-1 text-xs text-muted-foreground flex items-center justify-between gap-3">
+                      <span>
+                        AI is off for this contact. Enable it only after the customer agrees to analysis.
+                      </span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-7 whitespace-nowrap text-xs"
+                        disabled={isUpdatingAiConsent}
+                        onClick={() => void updateAiConsent(true)}
+                      >
+                        {isUpdatingAiConsent && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
+                        Record consent
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
 
               {/* Channel warning */}
               {!data.whatsappConnected && (
@@ -525,7 +717,13 @@ export function InboxContent({
             </div>
 
             {/* Customer side panel */}
-            {showCustomerPanel && <CustomerPanel conversation={active} />}
+            {showCustomerPanel && (
+              <CustomerPanel
+                conversation={active}
+                isUpdatingAiConsent={isUpdatingAiConsent}
+                onChangeAiConsent={(allowed) => void updateAiConsent(allowed)}
+              />
+            )}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">
