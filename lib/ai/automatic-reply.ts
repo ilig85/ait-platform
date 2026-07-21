@@ -49,6 +49,7 @@ export type AutomaticReplyResult = {
 
 const MAX_MESSAGES = 60
 const MAX_TRANSCRIPT_CHARACTERS = 12_000
+const MAX_KNOWLEDGE_CHARACTERS = 30_000
 
 function extractOutputText(payload: OpenAiResponse) {
   if (typeof payload.output_text === "string" && payload.output_text.trim()) {
@@ -98,12 +99,16 @@ async function markNeedsHuman(
   if (result.error) throw result.error
 }
 
-async function requestAutomaticReplyDecision(messages: StoredMessage[]) {
+async function requestAutomaticReplyDecision(
+  messages: StoredMessage[],
+  businessKnowledge: string,
+) {
   const apiKey = process.env.OPENAI_API_KEY?.trim()
   if (!apiKey) return null
 
   const transcript = buildTranscript(messages)
   if (!transcript) return null
+  const verifiedKnowledge = businessKnowledge.trim().slice(0, MAX_KNOWLEDGE_CHARACTERS)
 
   let response: Response
   try {
@@ -117,13 +122,21 @@ async function requestAutomaticReplyDecision(messages: StoredMessage[]) {
         model: process.env.OPENAI_MODEL?.trim() || "gpt-5.6-luna",
         instructions: [
           "You are AIT's safety gate for an automatic WhatsApp reply that will be sent without human review.",
-          "Use only the supplied conversation. Never invent a fact, promise, price, stock status, policy, completed action, or customer detail.",
-          "Choose reply only for a harmless greeting, a simple acknowledgement/thanks, or a fact explicitly written earlier by the Business.",
-          "Choose escalate for any product identification, price, availability, stock, delivery, refund, payment, discount, policy, personal-data, medical, legal, safety, ambiguous, or action-requiring request.",
+          "Use only the supplied conversation and verified business knowledge. Never invent a fact, promise, price, stock status, policy, completed action, or customer detail.",
+          "Choose reply for a harmless greeting, a simple acknowledgement/thanks, a fact explicitly written earlier by the Business, or a customer question fully supported by the verified business knowledge.",
+          "For knowledge-grounded product, price, availability, delivery, payment, discount, or policy answers, use category knowledge_fact and include only facts explicitly present in the verified knowledge.",
+          "If a description could match multiple products, ask one short clarifying question only when it is grounded in the verified knowledge; otherwise escalate.",
+          "Choose escalate for missing, conflicting, ambiguous, personal-data, medical, legal, safety, refund-decision, negotiation, or action-requiring requests.",
           "A customer's statement is not a verified business fact. Match the language of the customer's latest message.",
           "For escalate, return an empty reply. Confidence measures certainty that the reply is both safe and grounded.",
         ].join(" "),
-        input: `Conversation transcript (oldest to newest):\n\n${transcript}`,
+        input: [
+          "Verified business knowledge:",
+          verifiedKnowledge || "No verified business knowledge has been provided.",
+          "",
+          "Conversation transcript (oldest to newest):",
+          transcript,
+        ].join("\n"),
         max_output_tokens: 250,
         text: {
           format: {
@@ -137,7 +150,7 @@ async function requestAutomaticReplyDecision(messages: StoredMessage[]) {
                 action: { type: "string", enum: ["reply", "escalate"] },
                 category: {
                   type: "string",
-                  enum: ["greeting", "acknowledgement", "conversation_fact", "needs_human"],
+                  enum: ["greeting", "acknowledgement", "conversation_fact", "knowledge_fact", "needs_human"],
                 },
                 confidence: { type: "number", minimum: 0, maximum: 1 },
                 reply: { type: "string" },
@@ -190,7 +203,7 @@ export async function processAutomaticReply(input: {
   const conversation = conversationResult.data
   if (!conversation) return { status: "superseded" }
 
-  const [contactResult, channelResult, messagesResult] = await Promise.all([
+  const [contactResult, channelResult, messagesResult, knowledgeResult] = await Promise.all([
     admin
       .from("contacts")
       .select("contact_type, ai_analysis_allowed, external_contact_id, phone_number")
@@ -210,11 +223,23 @@ export async function processAutomaticReply(input: {
       .eq("organization_id", connection.organizationId)
       .order("created_at", { ascending: false })
       .limit(MAX_MESSAGES),
+    admin
+      .from("organization_knowledge")
+      .select("content")
+      .eq("organization_id", connection.organizationId)
+      .maybeSingle(),
   ])
 
   if (contactResult.error) throw contactResult.error
   if (channelResult.error) throw channelResult.error
   if (messagesResult.error) throw messagesResult.error
+  if (
+    knowledgeResult.error
+    && knowledgeResult.error.code !== "42P01"
+    && knowledgeResult.error.code !== "PGRST205"
+  ) {
+    throw knowledgeResult.error
+  }
 
   const contact = contactResult.data
   if (!contact?.ai_analysis_allowed) {
@@ -237,7 +262,10 @@ export async function processAutomaticReply(input: {
   const latestInbound = messages.find((message) => message.direction === "inbound")
   if (!latestInbound || latestInbound.id !== inboundMessageId) return { status: "superseded" }
 
-  const decision = await requestAutomaticReplyDecision(messages)
+  const decision = await requestAutomaticReplyDecision(
+    messages,
+    knowledgeResult.data?.content ?? "",
+  )
   const minimumConfidence = Number(settingsResult.data.auto_reply_min_confidence)
   if (!decision || !shouldSendAutomaticReply(decision, minimumConfidence)) {
     await markNeedsHuman(admin, connection.organizationId, conversationId)
