@@ -9,7 +9,10 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  EyeOff,
   FileText,
+  History,
+  RefreshCw,
   GripHorizontal,
   Info,
   Loader2,
@@ -44,7 +47,7 @@ const STATUS_CONFIG: Record<
   { label: string; icon: React.ElementType; dotColor: string; badgeClass: string }
 > = {
   needs_human: {
-    label: "Needs human",
+    label: "Manager needed",
     icon: AlertCircle,
     dotColor: "#FF6B6B",
     badgeClass: "bg-[#FF6B6B]/10 text-[#FF6B6B] border-[#FF6B6B]/20",
@@ -286,6 +289,10 @@ export function InboxContent({
   const [summaryCollapsed, setSummaryCollapsed] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
   const [isUpdatingAiConsent, setIsUpdatingAiConsent] = useState(false)
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [conversationActionError, setConversationActionError] = useState<string | null>(null)
+  const [hiddenMessageIds, setHiddenMessageIds] = useState<Set<string>>(() => new Set())
   const messageViewportRef = useRef<HTMLDivElement>(null)
   const refreshTimerRef = useRef<number | null>(null)
 
@@ -326,7 +333,14 @@ export function InboxContent({
         },
         refreshInbox,
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") refreshInbox()
+      })
+
+    // Realtime can be unavailable when the publication has not been applied yet
+    // or after a temporary socket drop. Keep a lightweight visible-tab fallback
+    // so the demo inbox never silently becomes stale.
+    const pollTimer = window.setInterval(refreshInbox, 3_000)
 
     const refreshWhenVisible = () => {
       if (document.visibilityState === "visible") refreshInbox()
@@ -335,6 +349,7 @@ export function InboxContent({
 
     return () => {
       document.removeEventListener("visibilitychange", refreshWhenVisible)
+      window.clearInterval(pollTimer)
       if (refreshTimerRef.current !== null) {
         window.clearTimeout(refreshTimerRef.current)
         refreshTimerRef.current = null
@@ -350,6 +365,41 @@ export function InboxContent({
     setAiSummary(null)
     setSummaryCollapsed(false)
     setAiError(null)
+    setConversationActionError(null)
+  }
+
+  function refreshNow() {
+    if (isRefreshing) return
+    setIsRefreshing(true)
+    router.refresh()
+    window.setTimeout(() => setIsRefreshing(false), 700)
+  }
+
+  async function markHandoffHandled() {
+    if (!activeId || isUpdatingStatus) return
+    setIsUpdatingStatus(true)
+    setConversationActionError(null)
+
+    try {
+      const response = await fetch(
+        `/api/conversations/${encodeURIComponent(activeId)}/status`,
+        { method: "PATCH" },
+      )
+      const payload = await response.json().catch(() => null) as {
+        message?: string
+      } | null
+
+      if (!response.ok) {
+        setConversationActionError(payload?.message ?? "AIT could not clear the manager handoff.")
+        return
+      }
+
+      router.refresh()
+    } catch {
+      setConversationActionError("AIT could not reach the server. Check your connection and try again.")
+    } finally {
+      setIsUpdatingStatus(false)
+    }
   }
 
   async function updateAiConsent(allowed: boolean) {
@@ -477,6 +527,57 @@ export function InboxContent({
   )
 
   const active = data.conversations.find((c) => c.id === activeId) ?? filtered[0] ?? null
+  const visibleMessages = active
+    ? active.messages.filter((message) => !hiddenMessageIds.has(message.id))
+    : []
+  const hiddenMessageCount = active ? active.messages.length - visibleMessages.length : 0
+
+  useEffect(() => {
+    if (!active?.id) {
+      setHiddenMessageIds(new Set())
+      return
+    }
+
+    try {
+      const key = `ait:inbox-hidden:${data.organizationId}:${active.id}`
+      const stored = window.localStorage.getItem(key)
+      const ids = stored ? JSON.parse(stored) : []
+      setHiddenMessageIds(new Set(Array.isArray(ids) ? ids.filter((id) => typeof id === "string") : []))
+    } catch {
+      setHiddenMessageIds(new Set())
+    }
+  }, [active?.id, data.organizationId])
+
+  function startFreshView() {
+    if (!active) return
+    const confirmed = window.confirm(
+      "Hide the messages currently shown in this conversation? The database history will stay safe, and new messages will still appear.",
+    )
+    if (!confirmed) return
+
+    const ids = active.messages.map((message) => message.id)
+    try {
+      window.localStorage.setItem(
+        `ait:inbox-hidden:${data.organizationId}:${active.id}`,
+        JSON.stringify(ids),
+      )
+    } catch {
+      // The view still resets for this tab when storage is unavailable.
+    }
+    setHiddenMessageIds(new Set(ids))
+    setAiSummary(null)
+    setDraft("")
+  }
+
+  function restoreEarlierMessages() {
+    if (!active) return
+    try {
+      window.localStorage.removeItem(`ait:inbox-hidden:${data.organizationId}:${active.id}`)
+    } catch {
+      // Restoring the current tab does not depend on storage access.
+    }
+    setHiddenMessageIds(new Set())
+  }
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -485,7 +586,7 @@ export function InboxContent({
     })
 
     return () => window.cancelAnimationFrame(frame)
-  }, [active?.id, active?.messages.length])
+  }, [active?.id, visibleMessages.length])
 
   if (data.conversations.length === 0) {
     return (
@@ -585,20 +686,72 @@ export function InboxContent({
                       </p>
                       <span className="text-[10px] text-muted-foreground/50">·</span>
                       <p className="text-[10px] text-muted-foreground">
-                        {active.messages.length} stored messages
+                        {visibleMessages.length} visible message{visibleMessages.length === 1 ? "" : "s"}
+                        {hiddenMessageCount > 0 ? ` · ${hiddenMessageCount} hidden for demo` : ""}
                       </p>
                     </div>
                   </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 w-7 p-0 flex-shrink-0 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowCustomerPanel((v) => !v)}
-                    aria-label="Toggle contact panel"
-                  >
-                    <Users className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {active.needsHuman && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="h-7 px-2.5 text-xs bg-amber-500 text-white hover:bg-amber-600"
+                        disabled={isUpdatingStatus}
+                        onClick={() => void markHandoffHandled()}
+                      >
+                        {isUpdatingStatus
+                          ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                          : <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />}
+                        Mark handled
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                      disabled={isRefreshing}
+                      onClick={refreshNow}
+                      aria-label="Refresh messages now"
+                      title="Refresh messages now"
+                    >
+                      <RefreshCw className={cn("w-3.5 h-3.5", isRefreshing && "animate-spin")} />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-[11px]"
+                      onClick={startFreshView}
+                      title="Hide earlier test messages in this browser"
+                    >
+                      <EyeOff className="w-3.5 h-3.5 mr-1.5" />
+                      Start fresh
+                    </Button>
+                    {hiddenMessageCount > 0 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-[11px] text-muted-foreground"
+                        onClick={restoreEarlierMessages}
+                      >
+                        <History className="w-3.5 h-3.5 mr-1.5" />
+                        Show history
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowCustomerPanel((v) => !v)}
+                      aria-label="Toggle contact panel"
+                    >
+                      <Users className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <Button
@@ -636,6 +789,17 @@ export function InboxContent({
                   </Button>
                 </div>
               </div>
+
+              {conversationActionError && (
+                <div className="px-4 pt-3">
+                  <Alert className="border-destructive/30 bg-destructive/5 py-2">
+                    <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                    <AlertDescription className="ml-1 text-xs text-destructive">
+                      {conversationActionError}
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
 
               {aiSummary && (
                 <div
@@ -686,13 +850,28 @@ export function InboxContent({
                 className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4"
                 aria-label="Stored conversation history"
               >
-                {active.messages.length === 0 ? (
-                  <div className="h-full min-h-32 flex items-center justify-center text-xs text-muted-foreground">
-                    No stored messages in this conversation.
+                {visibleMessages.length === 0 ? (
+                  <div className="h-full min-h-32 flex flex-col items-center justify-center text-center text-xs text-muted-foreground">
+                    <p>
+                      {hiddenMessageCount > 0
+                        ? "Fresh demo view is ready. New messages will appear here automatically."
+                        : "No stored messages in this conversation."}
+                    </p>
+                    {hiddenMessageCount > 0 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="mt-2 h-7 text-xs"
+                        onClick={restoreEarlierMessages}
+                      >
+                        Show earlier messages
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <div>
-                    {active.messages.map((message) => (
+                    {visibleMessages.map((message) => (
                       <MessageBubble key={message.id} message={message} />
                     ))}
                   </div>
