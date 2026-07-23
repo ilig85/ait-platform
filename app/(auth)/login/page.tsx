@@ -50,7 +50,7 @@ function LoginForm() {
   }
 
   function handleDemo() {
-    router.push("/")
+    router.push("/demo")
   }
 
   return (
