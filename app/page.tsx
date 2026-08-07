@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   Clock3,
   Languages,
-  Menu,
   MessageCircle,
   ShieldCheck,
   UserRoundCheck,
@@ -66,8 +65,8 @@ export default function LandingPage() {
             <Link href="/signup" className="rounded-full bg-[#173E3C] px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 hover:bg-[#245451]">Start free</Link>
           </div>
 
-          <Link href="/login" aria-label="Open login" className="rounded-full border border-[#173E3C]/15 p-2.5 md:hidden">
-            <Menu className="h-5 w-5" />
+          <Link href="/login" className="rounded-full border border-[#173E3C]/15 px-4 py-2 text-sm font-bold md:hidden">
+            Log in
           </Link>
         </nav>
       </header>
