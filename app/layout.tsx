@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Noto_Sans } from "next/font/google"
+import { Cormorant_Garamond, Noto_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { I18nProvider } from "@/lib/i18n"
@@ -10,13 +10,19 @@ import "./globals.css"
 const notoSans = Noto_Sans({
   subsets: ["latin", "cyrillic"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-sans",
+  variable: "--font-ait-sans",
+})
+
+const display = Cormorant_Garamond({
+  subsets: ["latin", "cyrillic"],
+  weight: ["500", "600", "700"],
+  variable: "--font-ait-display",
 })
 
 export const metadata: Metadata = {
-  title: "AIT — Your customers message. AIT handles the rest.",
+  title: "AIT — The WhatsApp AI that speaks like your business",
   description:
-    "Connect WhatsApp Business, organize every conversation, and let AI answer customers while you stay in control.",
+    "Connect WhatsApp Business, organize every conversation, and let AIT answer customers while you stay in control.",
   generator: "v0.app",
   icons: {
     icon: [
@@ -29,21 +35,25 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#071A1B",
+  themeColor: "#1E4D57",
   width: "device-width",
   initialScale: 1,
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${notoSans.variable} bg-background`} suppressHydrationWarning>
+    <html
+      lang="ru"
+      className={`${notoSans.variable} ${display.variable} bg-background`}
+      suppressHydrationWarning
+    >
       <body className="font-sans antialiased">
         <I18nProvider>
           <ThemeProvider defaultTheme="light" storageKey="ait-theme">
             <a
               href="#main-content"
-              className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold"
-              style={{ backgroundColor: "#2DE2B1", color: "#071A1B" }}
+              className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-xl focus:text-sm focus:font-semibold"
+              style={{ backgroundColor: "#82B996", color: "#14363E" }}
             >
               Skip to main content
             </a>
