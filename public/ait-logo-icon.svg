@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 280" role="img" aria-labelledby="title desc">
+  <title id="title">AIT compact icon</title>
+  <desc id="desc">The compact AIT water-frog brand mark.</desc>
+  <g id="frog-dot" transform="translate(32 8)">
+    <path d="M42 127C42 67 65 20 100 20c20 0 24 15 48 15s28-15 48-15c35 0 58 47 58 107 0 58-42 90-106 90S42 185 42 127Z" fill="#63A98C" stroke="#14233A" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M47 132c-13 12-27 17-40 16" fill="none" stroke="#14233A" stroke-width="28" stroke-linecap="round"/>
+    <path d="M47 132c-13 12-27 17-40 16" fill="none" stroke="#63A98C" stroke-width="18" stroke-linecap="round"/>
+    <path d="M249 132c13 12 27 17 40 16" fill="none" stroke="#14233A" stroke-width="28" stroke-linecap="round"/>
+    <path d="M249 132c13 12 27 17 40 16" fill="none" stroke="#63A98C" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="112" cy="116" r="8" fill="#14233A"/>
+    <circle cx="184" cy="116" r="8" fill="#14233A"/>
+    <path d="M130 143c11 9 25 9 36 0" fill="none" stroke="#14233A" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>
