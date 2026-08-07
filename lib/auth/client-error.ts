@@ -6,7 +6,7 @@ export function getAuthErrorMessage(error: unknown) {
       : ""
 
   if (/load failed|failed to fetch|network.*request|fetch.*failed/i.test(message)) {
-    return "Authentication could not reach Supabase from this preview. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to the Preview environment in Vercel, then redeploy."
+    return "Authentication could not reach Supabase from this preview. Check that NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are enabled for the Preview environment in Vercel, then redeploy."
   }
 
   if (/supabaseurl|supabase.*key|environment variable|invalid api key/i.test(message)) {
