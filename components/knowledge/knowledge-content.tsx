@@ -274,9 +274,9 @@ export function KnowledgeContent({
       />
 
       <div className="max-w-4xl space-y-4">
-        <div className="rounded-xl border border-[#2DE2B1]/25 bg-[#2DE2B1]/7 p-4 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-[#2DE2B1]/15 flex items-center justify-center flex-shrink-0">
-            <Sparkles className="w-4 h-4 text-[#2DE2B1]" />
+        <div className="rounded-xl border border-primary/25 bg-primary/7 p-4 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-4 h-4 text-primary" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">Fast MVP knowledge</h2>
@@ -290,7 +290,7 @@ export function KnowledgeContent({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <FileSpreadsheet className="w-4 h-4 text-[#2DE2B1]" />
+                <FileSpreadsheet className="w-4 h-4 text-primary" />
                 <h2 className="text-sm font-semibold text-foreground">Import a spreadsheet</h2>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -328,7 +328,7 @@ export function KnowledgeContent({
         <div className="bg-card border border-border/60 rounded-xl p-5 space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-[#2DE2B1]" />
+              <BookOpen className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">Business facts</h2>
             </div>
             <span className="text-[11px] text-muted-foreground">
@@ -364,7 +364,7 @@ export function KnowledgeContent({
               size="sm"
               disabled={!available || !canEdit || isSaving || content === savedContent}
               onClick={() => void saveKnowledge()}
-              className="bg-[#2DE2B1] text-[#071A1B] hover:bg-[#2DE2B1]/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isSaving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
               Save knowledge
@@ -374,7 +374,7 @@ export function KnowledgeContent({
 
         <div className="bg-card border border-border/60 rounded-xl p-5 space-y-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#2DE2B1]" />
+            <Sparkles className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">Test an AI answer</h2>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -399,7 +399,7 @@ export function KnowledgeContent({
               size="sm"
               disabled={!available || isTesting || !question.trim() || !savedContent.trim()}
               onClick={() => void testKnowledge()}
-              className="bg-[#2DE2B1] text-[#071A1B] hover:bg-[#2DE2B1]/90 sm:min-w-28"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 sm:min-w-28"
             >
               {isTesting ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
               Test AI
@@ -411,10 +411,10 @@ export function KnowledgeContent({
                 ? "border-destructive/30 bg-destructive/5"
                 : testResult.kind === "handoff"
                   ? "border-amber-400/30 bg-amber-400/8"
-                  : "border-[#2DE2B1]/30 bg-[#2DE2B1]/7"
+                  : "border-primary/30 bg-primary/7"
             }>
               {testResult.kind === "answer"
-                ? <CheckCircle2 className="h-4 w-4 text-[#2DE2B1]" />
+                ? <CheckCircle2 className="h-4 w-4 text-primary" />
                 : <AlertCircle className={testResult.kind === "error" ? "h-4 w-4 text-destructive" : "h-4 w-4 text-amber-500"} />}
               <AlertDescription className={testResult.kind === "error" ? "text-xs text-destructive" : "text-xs text-foreground"}>
                 {testResult.text}
@@ -440,10 +440,10 @@ export function KnowledgeContent({
           </Alert>
         )}
         {message && (
-          <Alert className={message.kind === "error" ? "border-destructive/30 bg-destructive/5" : "border-[#2DE2B1]/30 bg-[#2DE2B1]/7"}>
+          <Alert className={message.kind === "error" ? "border-destructive/30 bg-destructive/5" : "border-primary/30 bg-primary/7"}>
             {message.kind === "error"
               ? <AlertCircle className="h-4 w-4 text-destructive" />
-              : <CheckCircle2 className="h-4 w-4 text-[#2DE2B1]" />}
+              : <CheckCircle2 className="h-4 w-4 text-primary" />}
             <AlertDescription className={message.kind === "error" ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>
               {message.text}
             </AlertDescription>

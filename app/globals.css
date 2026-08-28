@@ -180,28 +180,6 @@
 aside[class*="bg-sidebar"] { box-shadow: 14px 0 36px rgba(23, 62, 60, .09); }
 main#main-content { position: relative; animation: page-enter 480ms cubic-bezier(.16, 1, .3, 1) both; }
 
-/* Remove the former neon palette from older dashboard components. */
-[class~="bg-[#2DE2B1]"] { background-color: var(--ait-green) !important; }
-[class~="bg-[#2DE2B1]/5"] { background-color: color-mix(in srgb, var(--ait-green) 5%, transparent) !important; }
-[class~="bg-[#2DE2B1]/7"] { background-color: color-mix(in srgb, var(--ait-green) 7%, transparent) !important; }
-[class~="bg-[#2DE2B1]/10"] { background-color: color-mix(in srgb, var(--ait-green) 10%, transparent) !important; }
-[class~="bg-[#2DE2B1]/20"] { background-color: color-mix(in srgb, var(--ait-green) 20%, transparent) !important; }
-[class~="bg-[#2DE2B1]/30"] { background-color: color-mix(in srgb, var(--ait-green) 30%, transparent) !important; }
-[class~="hover:bg-[#2DE2B1]/90"]:hover, [class~="hover:bg-[#25c99e]"]:hover { background-color: var(--ait-green-dark) !important; }
-[class~="text-[#2DE2B1]"] { color: var(--ait-green-dark) !important; }
-[class~="text-[#2DE2B1]/50"] { color: color-mix(in srgb, var(--ait-green-dark) 60%, transparent) !important; }
-[class~="hover:text-[#2DE2B1]"]:hover { color: var(--ait-green-dark) !important; }
-[class~="border-[#2DE2B1]/20"] { border-color: color-mix(in srgb, var(--ait-green) 22%, transparent) !important; }
-[class~="border-[#2DE2B1]/30"] { border-color: color-mix(in srgb, var(--ait-green) 34%, transparent) !important; }
-[class~="bg-[#071A1B]"] { background-color: var(--ait-ink) !important; }
-[class~="text-[#071A1B]"] { color: var(--ait-ink) !important; }
-[class~="bg-[#0D292A]"] { background-color: var(--ait-forest) !important; }
-[class~="text-[#C8D8D9]"] { color: #dce7df !important; }
-[class~="bg-[#FF6B6B]"] { background-color: var(--ait-coral) !important; }
-[class~="text-[#FF6B6B]"] { color: var(--ait-coral) !important; }
-[class~="text-[#67D9FF]"] { color: var(--ait-blue) !important; }
-[class~="bg-[#67D9FF]/10"] { background-color: color-mix(in srgb, var(--ait-blue) 10%, transparent) !important; }
-[class~="text-[#102223]"] { color: var(--ait-ink) !important; }
 
 @keyframes page-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes slideInUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }

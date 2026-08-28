@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
                 <Input id="email" type="email" placeholder="name@business.kg" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full bg-[#2DE2B1] hover:bg-[#25c99e] text-[#071A1B] font-semibold" disabled={isPending}>
+              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" disabled={isPending}>
                 {isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
                 {isPending ? "Sending…" : "Send reset link"}
               </Button>

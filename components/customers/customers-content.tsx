@@ -13,19 +13,19 @@ import { cn } from "@/lib/utils"
 type DisplayStatus = "needs_human" | "open" | "pending" | "resolved" | "archived" | "none"
 
 const STATUS_DOT: Record<DisplayStatus, string> = {
-  needs_human: "bg-[#FF6B6B]",
-  open: "bg-[#67D9FF]",
+  needs_human: "bg-destructive",
+  open: "bg-sky-500",
   pending: "bg-amber-400",
-  resolved: "bg-[#2DE2B1]",
+  resolved: "bg-primary",
   archived: "bg-muted-foreground/40",
   none: "bg-muted-foreground/20",
 }
 
 const STATUS_BADGE: Record<DisplayStatus, string> = {
-  needs_human: "bg-[#FF6B6B]/10 text-[#FF6B6B] border-[#FF6B6B]/20",
-  open: "bg-[#67D9FF]/10 text-[#67D9FF] border-[#67D9FF]/20",
+  needs_human: "bg-destructive/10 text-destructive border-destructive/20",
+  open: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20",
   pending: "bg-amber-400/10 text-amber-400 border-amber-400/20",
-  resolved: "bg-[#2DE2B1]/10 text-[#2DE2B1] border-[#2DE2B1]/20",
+  resolved: "bg-primary/10 text-primary border-primary/20",
   archived: "bg-muted text-muted-foreground border-border",
   none: "bg-muted text-muted-foreground border-border",
 }
@@ -64,8 +64,8 @@ export function CustomersContent({ data }: { data: CustomersData }) {
 
       {data.customers.length === 0 ? (
         <div className="min-h-[360px] rounded-xl border border-dashed border-border/60 bg-card flex flex-col items-center justify-center text-center p-8">
-          <div className="w-12 h-12 rounded-full bg-[#2DE2B1]/10 flex items-center justify-center mb-4">
-            <MessageCircle className="w-6 h-6 text-[#2DE2B1]" />
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <MessageCircle className="w-6 h-6 text-primary" />
           </div>
           <h2 className="text-sm font-semibold text-foreground">No contacts yet</h2>
           <p className="text-sm text-muted-foreground mt-1.5 max-w-md leading-relaxed">
@@ -82,7 +82,7 @@ export function CustomersContent({ data }: { data: CustomersData }) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t("customers_search")}
-                className="w-full pl-8 pr-4 py-2 text-sm bg-card border border-border/60 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#2DE2B1]/30"
+                className="w-full pl-8 pr-4 py-2 text-sm bg-card border border-border/60 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="flex flex-col gap-1 overflow-y-auto flex-1 pr-0.5">
@@ -98,11 +98,11 @@ export function CustomersContent({ data }: { data: CustomersData }) {
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all border",
                         selected?.id === customer.id
-                          ? "bg-[#2DE2B1]/8 border-[#2DE2B1]/30"
+                          ? "bg-primary/8 border-primary/30"
                           : "bg-card border-border/60 hover:bg-muted/30",
                       )}
                     >
-                      <div className="w-8 h-8 rounded-full bg-[#2DE2B1]/15 flex items-center justify-center text-sm font-bold text-[#102223] flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-sm font-bold text-primary-foreground flex-shrink-0">
                         {customer.displayName.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -128,7 +128,7 @@ export function CustomersContent({ data }: { data: CustomersData }) {
             <div className="flex-1 bg-card border border-border/60 rounded-xl overflow-y-auto">
               <div className="p-5 border-b border-border/60">
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-full bg-[#2DE2B1]/15 flex items-center justify-center text-xl font-bold text-[#102223] flex-shrink-0">
+                  <div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center text-xl font-bold text-primary-foreground flex-shrink-0">
                     {selected.displayName.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -172,7 +172,7 @@ export function CustomersContent({ data }: { data: CustomersData }) {
 
               <div className="px-5 py-4 border-b border-border/60">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#2DE2B1]" />
+                  <ShieldCheck className="w-4 h-4 text-primary" />
                   <div>
                     <p className="text-xs font-semibold text-foreground">AI analysis consent</p>
                     <p className="text-xs text-muted-foreground">

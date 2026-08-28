@@ -107,7 +107,7 @@ export function AitSettingsContent({
               className={cn(
                 "flex items-center gap-2 flex-1 justify-center px-3 py-2 text-xs rounded-lg font-medium transition-all",
                 tab === item.id
-                  ? "bg-[#2DE2B1] text-[#071A1B]"
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
               )}
             >
@@ -121,7 +121,7 @@ export function AitSettingsContent({
       {tab === "business" && (
         <div className="bg-card border border-border/60 rounded-xl p-5 flex flex-col gap-4">
           <div className="flex items-center gap-2 mb-1">
-            <Building2 className="w-4 h-4 text-[#2DE2B1]" />
+            <Building2 className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">Business Profile</h2>
           </div>
           <ReadOnlyField label="Business name" value={data.organization.name} />
@@ -149,7 +149,7 @@ export function AitSettingsContent({
         <div className="bg-card border border-border/60 rounded-xl p-5 flex flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <BrainCircuit className="w-4 h-4 text-[#2DE2B1]" />
+              <BrainCircuit className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">AI response mode</h2>
             </div>
             <Badge variant="outline" className="text-[10px] capitalize">
@@ -169,11 +169,11 @@ export function AitSettingsContent({
               className={cn(
                 "rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                 responseMode === "draft"
-                  ? "border-[#2DE2B1] bg-[#2DE2B1]/8"
-                  : "border-border/60 hover:border-[#2DE2B1]/40",
+                  ? "border-primary bg-primary/8"
+                  : "border-border/60 hover:border-primary/40",
               )}
             >
-              <PenLine className="w-5 h-5 text-[#2DE2B1] mb-3" />
+              <PenLine className="w-5 h-5 text-primary mb-3" />
               <p className="text-sm font-semibold text-foreground">Draft for review</p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 AI writes the reply. A manager edits or approves it before sending.
@@ -187,11 +187,11 @@ export function AitSettingsContent({
               className={cn(
                 "rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                 responseMode === "auto"
-                  ? "border-[#2DE2B1] bg-[#2DE2B1]/8"
-                  : "border-border/60 hover:border-[#2DE2B1]/40",
+                  ? "border-primary bg-primary/8"
+                  : "border-border/60 hover:border-primary/40",
               )}
             >
-              <Bot className="w-5 h-5 text-[#2DE2B1] mb-3" />
+              <Bot className="w-5 h-5 text-primary mb-3" />
               <p className="text-sm font-semibold text-foreground">Automatic replies</p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 AI sends only when consent exists, WhatsApp allows a reply, and confidence is at least {Math.round(data.aiSettings.autoReplyMinConfidence * 100)}%.
@@ -224,7 +224,7 @@ export function AitSettingsContent({
           {aiModeMessage && (
             <p className={cn(
               "text-xs",
-              aiModeMessage.kind === "error" ? "text-destructive" : "text-[#168e70]",
+              aiModeMessage.kind === "error" ? "text-destructive" : "text-primary",
             )}>
               {aiModeMessage.text}
             </p>
@@ -243,13 +243,13 @@ export function AitSettingsContent({
       {tab === "channel" && (
         <div className="bg-card border border-border/60 rounded-xl p-5 flex flex-col gap-4">
           <div className="flex items-center gap-2 mb-1">
-            <Smartphone className="w-4 h-4 text-[#2DE2B1]" />
+            <Smartphone className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">Channels</h2>
           </div>
 
           {data.channels.length === 0 ? (
             <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border/60">
-              <XCircle className="w-5 h-5 text-[#FF6B6B] flex-shrink-0" />
+              <XCircle className="w-5 h-5 text-destructive flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-foreground">WhatsApp disconnected</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -262,7 +262,7 @@ export function AitSettingsContent({
               <div key={channel.id} className="rounded-xl border border-border/60 overflow-hidden">
                 <div className="flex items-start gap-3 p-4 bg-muted/20">
                   {channel.status === "connected" ? (
-                    <CheckCircle2 className="w-5 h-5 text-[#2DE2B1] flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
                   ) : (
                     <XCircle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                   )}
@@ -280,7 +280,7 @@ export function AitSettingsContent({
                       <p className="text-xs text-muted-foreground mt-0.5">{channel.connectedPhoneNumber}</p>
                     )}
                     {channel.lastError && (
-                      <p className="text-xs text-[#FF6B6B] mt-1">{channel.lastError}</p>
+                      <p className="text-xs text-destructive mt-1">{channel.lastError}</p>
                     )}
                   </div>
                 </div>
@@ -347,8 +347,8 @@ function ComingSoon({
 }) {
   return (
     <div className="bg-card border border-border/60 rounded-xl p-8 text-center">
-      <div className="w-12 h-12 rounded-full bg-[#2DE2B1]/10 flex items-center justify-center mx-auto mb-3">
-        <Icon className="w-6 h-6 text-[#2DE2B1]" />
+      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+        <Icon className="w-6 h-6 text-primary" />
       </div>
       <h2 className="text-sm font-semibold text-foreground">{title}</h2>
       <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto leading-relaxed">{description}</p>

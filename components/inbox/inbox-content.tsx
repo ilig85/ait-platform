@@ -773,7 +773,7 @@ export function InboxContent({
                   <Button
                     type="button"
                     size="sm"
-                    className="h-8 px-2.5 text-xs bg-[#2DE2B1] text-[#071A1B] hover:bg-[#2DE2B1]/90"
+                    className="h-8 px-2.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
                     disabled={
                       !active.aiAnalysisAllowed
                       || active.messages.length === 0
@@ -803,7 +803,7 @@ export function InboxContent({
               {aiSummary && (
                 <div
                   className={cn(
-                    "mx-4 mt-3 rounded-lg border border-[#2DE2B1]/25 bg-[#2DE2B1]/7 flex-shrink-0",
+                    "mx-4 mt-3 rounded-lg border border-primary/25 bg-primary/7 flex-shrink-0",
                     !summaryCollapsed && "resize-y overflow-auto",
                   )}
                   style={summaryCollapsed ? undefined : {
@@ -812,9 +812,9 @@ export function InboxContent({
                     maxHeight: "45vh",
                   }}
                 >
-                  <div className="sticky top-0 flex items-center justify-between gap-2 px-3 py-2 bg-[#eafaf5] dark:bg-[#12302d] border-b border-[#2DE2B1]/15">
+                  <div className="sticky top-0 flex items-center justify-between gap-2 px-3 py-2 bg-primary/10 border-b border-primary/15">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <Sparkles className="w-3.5 h-3.5 text-[#2DE2B1] flex-shrink-0" />
+                      <Sparkles className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                       <p className="text-xs font-semibold text-foreground truncate">AI conversation summary</p>
                     </div>
                     <Button
@@ -890,8 +890,8 @@ export function InboxContent({
 
               {!active.aiAnalysisAllowed && (
                 <div className="px-4 pb-2">
-                  <Alert className="border-[#2DE2B1]/25 bg-[#2DE2B1]/5 py-2">
-                    <Sparkles className="h-3.5 w-3.5 text-[#2DE2B1]" />
+                  <Alert className="border-primary/25 bg-primary/5 py-2">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
                     <AlertDescription className="ml-1 text-xs text-muted-foreground flex items-center justify-between gap-3">
                       <span>
                         AI is off for this contact. Enable it only after the customer agrees to analysis.
