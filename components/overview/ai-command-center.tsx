@@ -9,8 +9,8 @@ export function AiCommandCenter() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-[#2DE2B1]/12 flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-[#2DE2B1]" />
+            <div className="w-7 h-7 rounded-md bg-primary/15 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
             </div>
             <h3 className="font-semibold text-sm text-foreground">AI Command Center</h3>
           </div>

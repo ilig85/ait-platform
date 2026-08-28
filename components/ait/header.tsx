@@ -82,7 +82,7 @@ export function AitHeader({ title, subtitle }: { title: string; subtitle?: strin
             >
               <Bell className="w-4 h-4" />
               {needsHumanCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center text-[9px] font-bold bg-[#FF6B6B] text-white rounded-full ring-2 ring-background">
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center text-[9px] font-bold bg-destructive text-destructive-foreground rounded-full ring-2 ring-background">
                   {needsHumanCount}
                 </span>
               )}
@@ -99,7 +99,7 @@ export function AitHeader({ title, subtitle }: { title: string; subtitle?: strin
                 onClick={() => setNotifOpen(false)}
                 className="flex items-start gap-3 px-4 py-3 hover:bg-muted/40 transition-colors"
               >
-                <span className="mt-1 w-2 h-2 rounded-full bg-[#FF6B6B] flex-shrink-0" />
+                <span className="mt-1 w-2 h-2 rounded-full bg-destructive flex-shrink-0" />
                 <p className="text-xs text-foreground leading-relaxed">
                   {needsHumanCount} {needsHumanCount === 1 ? "conversation needs" : "conversations need"} human attention.
                 </p>
@@ -120,7 +120,7 @@ export function AitHeader({ title, subtitle }: { title: string; subtitle?: strin
               size="sm"
               className="h-8 gap-2 px-2 border-border/60 bg-card hover:bg-muted/60"
             >
-              <div className="w-5 h-5 rounded-full bg-[#2DE2B1]/20 text-[#102223] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+              <div className="w-5 h-5 rounded-full bg-primary/20 text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                 {avatarInitial}
               </div>
               <span className="hidden sm:block text-xs font-medium max-w-[90px] truncate">{displayName}</span>

@@ -15,9 +15,9 @@ function StatusIndicator({ status }: { status: string }) {
     <span
       className={cn(
         "inline-flex w-2 h-2 rounded-full flex-shrink-0",
-        isConnected && "bg-[#2DE2B1]",
-        isWarning && "bg-amber-400",
-        isError && "bg-[#FF6B6B]",
+        isConnected && "bg-primary",
+        isWarning && "bg-accent",
+        isError && "bg-destructive",
         !isConnected && !isWarning && !isError && "bg-muted-foreground/40",
       )}
     />
@@ -115,7 +115,7 @@ export function ChannelHealth({
               {recentEscalations.map((conversation) => (
                 <Link key={conversation.id} href={`/inbox?conversation=${conversation.id}`}>
                   <div className="flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-muted/40 transition-colors cursor-pointer">
-                    <AlertCircle className="w-3.5 h-3.5 text-[#FF6B6B] mt-0.5 flex-shrink-0" />
+                    <AlertCircle className="w-3.5 h-3.5 text-destructive mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-foreground truncate">
                         {conversation.contactName}
@@ -136,7 +136,7 @@ export function ChannelHealth({
       <Card className="border-border/60 bg-card">
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-3.5 h-3.5 text-[#2DE2B1]" />
+            <BookOpen className="w-3.5 h-3.5 text-primary" />
             <h3 className="font-semibold text-sm text-foreground">Knowledge suggestions</h3>
           </div>
         </CardHeader>

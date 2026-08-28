@@ -12,7 +12,7 @@ const ITEMS = [
     key: "contacts" as const,
     icon: Users,
     href: "/customers",
-    accent: "#2DE2B1",
+    accent: "var(--ait-green)",
     tooltip: "All contacts stored for the selected organization.",
   },
   {
@@ -20,7 +20,7 @@ const ITEMS = [
     key: "resolvedConversations" as const,
     icon: CheckCircle2,
     href: "/inbox?filter=resolved",
-    accent: "#2DE2B1",
+    accent: "var(--ait-green)",
     tooltip: "Conversations whose current database status is resolved.",
   },
   {
@@ -28,7 +28,7 @@ const ITEMS = [
     key: "openConversations" as const,
     icon: MessageSquare,
     href: "/inbox?filter=open",
-    accent: "#67D9FF",
+    accent: "var(--ait-blue)",
     tooltip: "Conversations whose current status is open or pending.",
   },
   {
@@ -36,7 +36,7 @@ const ITEMS = [
     key: "needsHuman" as const,
     icon: AlertCircle,
     href: "/inbox?filter=needs_human",
-    accent: "#FF6B6B",
+    accent: "var(--ait-coral)",
     tooltip: "Conversations currently marked as needing human attention.",
   },
 ]
@@ -60,7 +60,7 @@ export function MetricCards({ metrics }: { metrics: OverviewData["metrics"] }) {
                 >
                   <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: `${item.accent}18` }}
+                    style={{ backgroundColor: `color-mix(in srgb, ${item.accent} 16%, transparent)` }}
                   >
                     <Icon className="w-4 h-4" style={{ color: item.accent }} />
                   </div>

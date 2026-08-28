@@ -34,7 +34,7 @@ export function ConversationsChart({ data }: { data: OverviewData["dailyActivity
             </div>
             <div className="text-right">
               <p className="text-xs text-muted-foreground">Messages</p>
-              <p className="text-sm font-semibold tabular-nums" style={{ color: "#2DE2B1" }}>{messageTotal}</p>
+              <p className="text-sm font-semibold tabular-nums" style={{ color: "var(--ait-green-dark)" }}>{messageTotal}</p>
             </div>
           </div>
         </div>
@@ -50,12 +50,12 @@ export function ConversationsChart({ data }: { data: OverviewData["dailyActivity
             <AreaChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="gradConversations" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2DE2B1" stopOpacity={0.18} />
-                  <stop offset="95%" stopColor="#2DE2B1" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--ait-green)" stopOpacity={0.22} />
+                  <stop offset="95%" stopColor="var(--ait-green)" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gradMessages" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#67D9FF" stopOpacity={0.12} />
-                  <stop offset="95%" stopColor="#67D9FF" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--ait-blue)" stopOpacity={0.16} />
+                  <stop offset="95%" stopColor="var(--ait-blue)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} strokeOpacity={0.6} />
@@ -83,7 +83,7 @@ export function ConversationsChart({ data }: { data: OverviewData["dailyActivity
                 type="monotone"
                 dataKey="conversations"
                 name="Conversations"
-                stroke="#2DE2B1"
+                stroke="var(--ait-green)"
                 strokeWidth={2}
                 fill="url(#gradConversations)"
               />
@@ -91,7 +91,7 @@ export function ConversationsChart({ data }: { data: OverviewData["dailyActivity
                 type="monotone"
                 dataKey="messages"
                 name="Messages"
-                stroke="#67D9FF"
+                stroke="var(--ait-blue)"
                 strokeWidth={1.5}
                 fill="url(#gradMessages)"
               />

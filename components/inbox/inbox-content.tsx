@@ -30,6 +30,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 import type { InboxConversation, InboxData, InboxMessage } from "@/lib/data/models"
 import { AitHeader } from "@/components/ait/header"
+import { Mascot } from "@/components/brand/mascot"
 import { useI18n } from "@/lib/i18n"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
@@ -49,26 +50,26 @@ const STATUS_CONFIG: Record<
   needs_human: {
     label: "Manager needed",
     icon: AlertCircle,
-    dotColor: "#FF6B6B",
-    badgeClass: "bg-[#FF6B6B]/10 text-[#FF6B6B] border-[#FF6B6B]/20",
+    dotColor: "var(--ait-coral)",
+    badgeClass: "bg-destructive/10 text-destructive border-destructive/20",
   },
   open: {
     label: "Open",
     icon: MessageSquare,
-    dotColor: "#67D9FF",
-    badgeClass: "bg-[#67D9FF]/10 text-[#67D9FF] border-[#67D9FF]/20",
+    dotColor: "var(--ait-blue)",
+    badgeClass: "bg-[color-mix(in_srgb,var(--ait-blue)_12%,transparent)] text-[color-mix(in_srgb,var(--ait-blue)_82%,black)] border-[color-mix(in_srgb,var(--ait-blue)_25%,transparent)]",
   },
   pending: {
     label: "Pending",
     icon: Clock,
-    dotColor: "#FFA94D",
-    badgeClass: "bg-amber-400/10 text-amber-400 border-amber-400/20",
+    dotColor: "var(--ait-orange)",
+    badgeClass: "bg-accent/10 text-accent-foreground border-accent/25",
   },
   resolved: {
     label: "Resolved",
     icon: CheckCircle2,
-    dotColor: "#2DE2B1",
-    badgeClass: "bg-[#2DE2B1]/10 text-[#2DE2B1] border-[#2DE2B1]/20",
+    dotColor: "var(--ait-green)",
+    badgeClass: "bg-primary/10 text-primary-foreground border-primary/20",
   },
   archived: {
     label: "Archived",
@@ -130,11 +131,11 @@ function ConvRow({
       className={cn(
         "w-full text-left px-3 py-3 flex items-start gap-3 border-b border-border/40 transition-all duration-150",
         active
-          ? "bg-[#2DE2B1]/6 border-l-2 border-l-[#2DE2B1]"
+          ? "bg-primary/8 border-l-2 border-l-primary"
           : "hover:bg-muted/30",
       )}
     >
-      <div className="w-8 h-8 rounded-full bg-[#2DE2B1]/15 text-[#102223] text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+      <div className="w-8 h-8 rounded-full bg-primary/15 text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
         {conversation.contactName.slice(0, 2).toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">
@@ -152,7 +153,7 @@ function ConvRow({
             {config.label}
           </span>
           {conversation.unreadCount > 0 && (
-            <span className="ml-auto text-[10px] bg-[#2DE2B1] text-[#071A1B] rounded-full px-1.5 py-0.5 font-semibold">
+            <span className="ml-auto text-[10px] bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 font-semibold">
               {conversation.unreadCount}
             </span>
           )}
@@ -176,7 +177,7 @@ function MessageBubble({ message }: { message: InboxMessage }) {
   return (
     <div className={cn("flex mb-3", inbound ? "justify-start" : "justify-end")}>
       {inbound && (
-        <div className="w-6 h-6 rounded-full bg-[#2DE2B1]/15 text-[#102223] text-[9px] font-bold flex items-center justify-center mr-2 mt-auto flex-shrink-0">
+        <div className="w-6 h-6 rounded-full bg-primary/15 text-primary-foreground text-[9px] font-bold flex items-center justify-center mr-2 mt-auto flex-shrink-0">
           C
         </div>
       )}
@@ -184,8 +185,8 @@ function MessageBubble({ message }: { message: InboxMessage }) {
         className={cn(
           "max-w-[72%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
           inbound && "bg-muted/60 text-foreground rounded-tl-sm",
-          !inbound && message.senderType === "ai" && "bg-[#2DE2B1]/12 text-foreground rounded-tr-sm",
-          !inbound && message.senderType !== "ai" && "bg-[#102223] text-sidebar-foreground rounded-tr-sm",
+          !inbound && message.senderType === "ai" && "bg-primary/12 text-foreground rounded-tr-sm",
+          !inbound && message.senderType !== "ai" && "bg-sidebar text-sidebar-foreground rounded-tr-sm",
         )}
       >
         {!inbound && (
@@ -218,7 +219,7 @@ function CustomerPanel({
     <aside className="w-64 xl:w-72 flex-shrink-0 border-l border-border/60 bg-sidebar overflow-y-auto">
       <div className="p-4 border-b border-border/60">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#2DE2B1]/15 text-[#102223] text-sm font-bold flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-primary/15 text-primary-foreground text-sm font-bold flex items-center justify-center flex-shrink-0">
             {conversation.contactName.slice(0, 2).toUpperCase()}
           </div>
           <div className="min-w-0">
@@ -593,9 +594,7 @@ export function InboxContent({
       <>
         <AitHeader title="Inbox" subtitle="Organization-scoped conversations and messages." />
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 rounded-xl border border-border/60 bg-card">
-          <div className="w-12 h-12 rounded-full bg-[#2DE2B1]/10 flex items-center justify-center mb-4">
-            <MessageSquare className="w-6 h-6 text-[#2DE2B1]" />
-          </div>
+          <Mascot pose="neutral" width={88} height={88} className="mb-3 h-22 w-22" />
           <h2 className="text-base font-semibold text-foreground">No conversations yet</h2>
           <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
             {data.whatsappConnected
@@ -636,7 +635,7 @@ export function InboxContent({
                   className={cn(
                     "text-[10px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap transition-colors flex-shrink-0 capitalize",
                     filter === item
-                      ? "bg-[#2DE2B1] text-[#071A1B]"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-muted/60 text-muted-foreground hover:bg-muted",
                   )}
                 >
@@ -671,7 +670,7 @@ export function InboxContent({
               <div className="px-4 py-3 border-b border-border/60 flex-shrink-0 space-y-2">
                 <div className="flex items-center justify-between gap-3 min-w-0">
                   <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-[#2DE2B1]/15 text-[#102223] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-primary/15 text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                     {active.contactName.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0">

@@ -91,7 +91,7 @@ export function AitSidebar() {
                         "flex items-center rounded-md transition-all duration-150 relative",
                         collapsed ? "justify-center h-9 w-9 mx-auto" : "gap-2.5 px-2.5 py-2",
                         active
-                          ? "bg-sidebar-accent text-[#2DE2B1]"
+                          ? "bg-sidebar-accent text-sidebar-primary"
                           : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/70",
                       )}
                       aria-current={active ? "page" : undefined}
@@ -104,7 +104,7 @@ export function AitSidebar() {
                         <span
                           className={cn(
                             "text-[10px] font-semibold leading-none px-1.5 py-0.5 rounded-full",
-                            "bg-[#FF6B6B] text-white",
+                            "bg-destructive text-destructive-foreground",
                             collapsed ? "absolute -top-0.5 -right-0.5" : "ml-auto",
                           )}
                         >
@@ -112,12 +112,12 @@ export function AitSidebar() {
                         </span>
                       )}
                       {active && !collapsed && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-[#2DE2B1] rounded-r-full" />
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-sidebar-primary rounded-r-full" />
                       )}
                     </Link>
                   </TooltipTrigger>
                   {collapsed && (
-                    <TooltipContent side="right" className="bg-[#0D292A] text-[#C8D8D9] text-xs border-sidebar-border">
+                    <TooltipContent side="right" className="bg-sidebar-accent text-sidebar-foreground text-xs border-sidebar-border">
                       {t(item.labelKey)}
                     </TooltipContent>
                   )}
@@ -140,7 +140,7 @@ export function AitSidebar() {
                       "flex items-center rounded-md transition-all duration-150",
                       collapsed ? "justify-center h-9 w-9 mx-auto" : "gap-2.5 px-2.5 py-2",
                       active
-                        ? "bg-sidebar-accent text-[#2DE2B1]"
+                        ? "bg-sidebar-accent text-sidebar-primary"
                         : "text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent/70",
                     )}
                     aria-current={active ? "page" : undefined}
@@ -150,7 +150,7 @@ export function AitSidebar() {
                   </Link>
                 </TooltipTrigger>
                 {collapsed && (
-                  <TooltipContent side="right" className="bg-[#0D292A] text-[#C8D8D9] text-xs border-sidebar-border">
+                  <TooltipContent side="right" className="bg-sidebar-accent text-sidebar-foreground text-xs border-sidebar-border">
                     {t(item.labelKey)}
                   </TooltipContent>
                 )}
@@ -176,7 +176,7 @@ export function AitSidebar() {
             </Link>
           </TooltipTrigger>
           {collapsed && (
-            <TooltipContent side="right" className="bg-[#0D292A] text-[#C8D8D9] text-xs border-sidebar-border">
+            <TooltipContent side="right" className="bg-sidebar-accent text-sidebar-foreground text-xs border-sidebar-border">
               {t("nav_logout")}
             </TooltipContent>
           )}
@@ -188,7 +188,7 @@ export function AitSidebar() {
         onClick={() => setCollapsed((v) => !v)}
         className={cn(
           "absolute -right-3 top-[4.5rem] w-6 h-6 rounded-full",
-          "bg-[#071A1B] border border-[#2DE2B1]/20 text-[#2DE2B1]/50 hover:text-[#2DE2B1]",
+          "bg-sidebar border border-sidebar-primary/25 text-sidebar-primary/60 hover:text-sidebar-primary",
           "flex items-center justify-center shadow-sm transition-colors",
         )}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
