@@ -1,15 +1,15 @@
 import Link from "next/link"
-import { AlertTriangle } from "lucide-react"
+import { AitLogo } from "@/components/brand/ait-logo"
+import { Mascot } from "@/components/brand/mascot"
 
 export default function AuthErrorPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md text-center">
-        <div className="flex justify-center mb-4">
-          <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
-            <AlertTriangle className="w-7 h-7 text-destructive" />
-          </div>
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <AitLogo variant="wordmark" theme="light" size="md" label="AIT" />
         </div>
+        <Mascot pose="thinking" width={88} height={98} className="mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-foreground mb-2">Authentication error</h1>
         <p className="text-muted-foreground mb-6 text-sm">
           Something went wrong during sign in. The link may have expired or already been used.

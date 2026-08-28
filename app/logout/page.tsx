@@ -3,8 +3,10 @@
 import { useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { LogOut, Zap, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { AitLogo } from "@/components/brand/ait-logo"
+import { Mascot } from "@/components/brand/mascot"
 import { useI18n } from "@/lib/i18n"
 import { createClient } from "@/lib/supabase/client"
 
@@ -26,14 +28,9 @@ export default function LogoutPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-sm text-center">
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-[#0F766E] flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-xl text-[#15253D]">AIT</span>
+          <AitLogo variant="wordmark" theme="light" size="md" label="AIT" />
         </div>
-        <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-          <LogOut className="w-6 h-6 text-muted-foreground" />
-        </div>
+        <Mascot pose="stretching" width={96} height={96} className="mx-auto mb-4" />
         <h1 className="text-xl font-bold mb-2">{t("auth_logout_confirm")}</h1>
         <p className="text-sm text-muted-foreground mb-6">{t("auth_logout_confirm_desc")}</p>
         <div className="flex gap-3">
@@ -43,7 +40,7 @@ export default function LogoutPage() {
           <Button
             onClick={handleLogout}
             disabled={isPending}
-            className="flex-1 bg-[#0F766E] hover:bg-[#0F766E]/90 text-white"
+            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
             {isPending ? "Signing out…" : t("nav_logout")}

@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, Loader2, CheckCircle2, AlertTriangle, Zap } from "lucide-react"
+import { Eye, EyeOff, Loader2, AlertTriangle } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { AitLogo } from "@/components/brand/ait-logo"
+import { Mascot } from "@/components/brand/mascot"
 import Link from "next/link"
 
 type PageState = "loading" | "ready" | "invalid" | "success"
@@ -75,10 +77,7 @@ export default function UpdatePasswordPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-[#0F766E] flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-xl text-[#15253D]">AIT</span>
+          <AitLogo variant="wordmark" theme="light" size="md" label="AIT" />
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
@@ -98,7 +97,7 @@ export default function UpdatePasswordPage() {
               </p>
               <Link
                 href="/forgot-password"
-                className="inline-flex w-full items-center justify-center px-4 py-2.5 bg-[#0F766E] text-white text-sm font-medium rounded-lg hover:bg-[#0F766E]/90 transition"
+                className="inline-flex w-full items-center justify-center px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition"
               >
                 Request new link
               </Link>
@@ -107,7 +106,7 @@ export default function UpdatePasswordPage() {
 
           {pageState === "success" && (
             <div className="text-center">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
+              <Mascot pose="welcome" width={96} height={96} className="mx-auto mb-3" />
               <h1 className="text-xl font-semibold text-foreground mb-2">Password updated</h1>
               <p className="text-sm text-muted-foreground">Redirecting you to the dashboard…</p>
             </div>
@@ -171,7 +170,7 @@ export default function UpdatePasswordPage() {
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#0F766E] text-white rounded-lg text-sm font-medium hover:bg-[#0F766E]/90 disabled:opacity-60 transition"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-60 transition"
                 >
                   {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                   {isPending ? "Saving…" : "Update password"}
