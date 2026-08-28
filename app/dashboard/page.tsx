@@ -5,25 +5,16 @@ import { MetricCards } from "@/components/overview/metric-cards"
 import { ConversationsChart } from "@/components/overview/conversations-chart"
 import { AiCommandCenter } from "@/components/overview/ai-command-center"
 import { ChannelHealth } from "@/components/overview/channel-health"
-import { Mascot } from "@/components/brand/mascot"
 import { getOverviewData } from "@/lib/data/dashboard"
 
 export default async function OverviewPage() {
   const result = await getOverviewData()
   return (
     <AppShell>
-      <div className="relative">
-        <AitHeader
-          title="Overview"
-          subtitle="Customer conversations, AI activity, and items that need you."
-        />
-        <Mascot
-          pose="peek-bottom"
-          width={96}
-          height={96}
-          className="pointer-events-none absolute -top-3 right-0 hidden h-20 w-20 opacity-90 sm:block"
-        />
-      </div>
+      <AitHeader
+        title="Overview"
+        subtitle="Customer conversations, AI activity, and items that need you."
+      />
 
       {result.status !== "ready" ? (
         <DataUnavailable

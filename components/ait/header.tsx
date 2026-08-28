@@ -15,6 +15,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useI18n, LOCALES, type Locale } from "@/lib/i18n"
 import { useShellData } from "@/components/ait/shell-context"
+import { Mascot } from "@/components/brand/mascot"
 import { cn } from "@/lib/utils"
 
 export function AitHeader({ title, subtitle }: { title: string; subtitle?: string }) {
@@ -25,7 +26,7 @@ export function AitHeader({ title, subtitle }: { title: string; subtitle?: strin
   const avatarInitial = displayName.charAt(0).toUpperCase()
 
   return (
-    <header className="flex items-center justify-between gap-4 mb-7 animate-fade-in">
+    <header className="flex items-center justify-between gap-4 mb-7 pt-0 sm:pt-14 animate-fade-in">
       <div className="min-w-0">
         <h1 className="text-xl font-semibold text-foreground truncate tracking-tight">{title}</h1>
         {subtitle && (
@@ -113,54 +114,62 @@ export function AitHeader({ title, subtitle }: { title: string; subtitle?: strin
         </Popover>
 
         {/* User menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-2 px-2 border-border/60 bg-card hover:bg-muted/60"
-            >
-              <div className="w-5 h-5 rounded-full bg-primary/20 text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                {avatarInitial}
-              </div>
-              <span className="hidden sm:block text-xs font-medium max-w-[90px] truncate">{displayName}</span>
-              <ChevronDown className="w-3 h-3 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52 border-border/60">
-            <DropdownMenuLabel className="font-normal px-3 py-2.5">
-              <p className="font-semibold text-sm truncate">{displayName}</p>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">{user?.email ?? ""}</p>
-              <p className="text-[10px] text-muted-foreground truncate mt-1 font-normal">{organizationName ?? "No organization"}</p>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="gap-2 cursor-pointer">
-              <Link href="/settings">
-                <User className="w-4 h-4" />
-                {t("settings_profile")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="gap-2 cursor-pointer">
-              <Link href="/settings">
-                <Settings className="w-4 h-4" />
-                {t("nav_settings")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="gap-2 cursor-pointer">
-              <Link href="/help">
-                <HelpCircle className="w-4 h-4" />
-                {t("nav_help")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="gap-2 cursor-pointer text-destructive focus:text-destructive">
-              <Link href="/logout">
-                <LogOut className="w-4 h-4" />
-                {t("nav_logout")}
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="relative">
+          <Mascot
+            pose="peek-bottom"
+            width={64}
+            height={64}
+            className="pointer-events-none absolute bottom-full right-0 mb-2 hidden h-14 w-14 opacity-90 sm:block"
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-2 px-2 border-border/60 bg-card hover:bg-muted/60"
+              >
+                <div className="w-5 h-5 rounded-full bg-primary/20 text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                  {avatarInitial}
+                </div>
+                <span className="hidden sm:block text-xs font-medium max-w-[90px] truncate">{displayName}</span>
+                <ChevronDown className="w-3 h-3 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52 border-border/60">
+              <DropdownMenuLabel className="font-normal px-3 py-2.5">
+                <p className="font-semibold text-sm truncate">{displayName}</p>
+                <p className="text-xs text-muted-foreground truncate mt-0.5">{user?.email ?? ""}</p>
+                <p className="text-[10px] text-muted-foreground truncate mt-1 font-normal">{organizationName ?? "No organization"}</p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild className="gap-2 cursor-pointer">
+                <Link href="/settings">
+                  <User className="w-4 h-4" />
+                  {t("settings_profile")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="gap-2 cursor-pointer">
+                <Link href="/settings">
+                  <Settings className="w-4 h-4" />
+                  {t("nav_settings")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="gap-2 cursor-pointer">
+                <Link href="/help">
+                  <HelpCircle className="w-4 h-4" />
+                  {t("nav_help")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                <Link href="/logout">
+                  <LogOut className="w-4 h-4" />
+                  {t("nav_logout")}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   )
