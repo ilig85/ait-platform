@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
+import { BaileysWhatsAppAdapter } from "@/lib/messaging/baileys/adapter"
 import { createMetaOutboundAdapter } from "@/lib/messaging/meta/adapter"
 import { SupabaseMetaWhatsAppCredentialResolver } from "@/lib/messaging/meta/credential-resolver"
 import { sendServiceWindowReply } from "@/lib/messaging/outbound-service"
+import type { MessagingProviderAdapter } from "@/lib/messaging/provider"
 import { SupabaseOutboundMessageStore } from "@/lib/messaging/supabase-stores"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { createClient } from "@/lib/supabase/server"
@@ -34,11 +36,16 @@ export async function POST(
     const metaAdapter = createMetaOutboundAdapter(
       new SupabaseMetaWhatsAppCredentialResolver(admin),
     )
+    const baileysAdapter = new BaileysWhatsAppAdapter()
+    const adapters = new Map<string, MessagingProviderAdapter>([
+      [metaAdapter.provider, metaAdapter],
+      [baileysAdapter.provider, baileysAdapter],
+    ])
     const result = await sendServiceWindowReply(
       { conversationId, text },
       {
         store: new SupabaseOutboundMessageStore(userClient, admin),
-        adapters: new Map([[metaAdapter.provider, metaAdapter]]),
+        adapters,
       },
     )
 
@@ -56,7 +63,7 @@ export async function POST(
       case "approved_template_required":
         return NextResponse.json({
           ...result,
-          message: "The 24-hour customer-service window is closed. An approved template is required.",
+          message: "The 24-hour customer-service window is closed.",
         }, { status: 409 })
       case "channel_unavailable":
         return NextResponse.json(result, { status: 409 })

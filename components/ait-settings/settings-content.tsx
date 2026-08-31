@@ -285,7 +285,9 @@ export function AitSettingsContent({
                   </div>
                 </div>
                 <div className="px-4 py-3 border-t border-border/60 text-xs text-muted-foreground space-y-1">
-                  {channel.metaConfigurationVisible ? (
+                  {channel.provider === "baileys" ? (
+                    <p>Linked-device session. Incoming and outgoing text messages use the AIT Baileys worker.</p>
+                  ) : channel.metaConfigurationVisible ? (
                     <>
                       <p>Meta identifiers: {channel.metaIdentifiersConfigured ? "Configured" : "Not configured"}</p>
                       <p>Webhook subscription: {channel.webhookSubscriptionStatus ?? "Unavailable"}</p>
