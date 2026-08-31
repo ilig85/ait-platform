@@ -23,6 +23,7 @@ SUPABASE_URL=<project URL>
 SUPABASE_SERVICE_ROLE_KEY=<server-only service role key>
 BAILEYS_AUTH_DIR=/data/baileys-auth
 LOG_LEVEL=info
+RAILWAY_RUN_UID=0
 ```
 
 Set these on the Vercel project for both Preview and Production:
@@ -36,7 +37,7 @@ Never expose either the service-role key or worker secret through a `NEXT_PUBLIC
 
 ## Railway deployment
 
-Create a service from this repository with `workers/baileys` as its root directory. Attach a persistent volume mounted at `/data` and set the worker variables above. The health endpoint is `GET /health`.
+Create a service from this repository with `workers/baileys` as its root directory. Attach a persistent volume mounted at `/data`, set `RAILWAY_RUN_UID=0` because Railway mounts volumes as root, and add the worker variables above. The health endpoint is `GET /health`.
 
 The persistent volume is mandatory for this MVP auth adapter. Losing the directory requires linking the WhatsApp number again. Baileys auth files contain long-lived Signal credentials: do not commit, log, download, or share them.
 
