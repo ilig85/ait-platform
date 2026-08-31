@@ -107,7 +107,7 @@ function MobileNav() {
                     className={cn(
                       "flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-colors text-sm font-medium",
                       active
-                        ? "bg-sidebar-accent text-[#2DE2B1]"
+                        ? "bg-sidebar-accent text-sidebar-primary"
                         : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/70",
                     )}
                     aria-current={active ? "page" : undefined}
@@ -115,7 +115,7 @@ function MobileNav() {
                     <Icon className="w-4 h-4 flex-shrink-0" />
                     <span className="truncate">{t(item.labelKey)}</span>
                     {badge > 0 && (
-                      <span className="ml-auto text-[10px] font-semibold leading-none px-1.5 py-0.5 rounded-full bg-[#FF6B6B] text-white">
+                      <span className="ml-auto text-[10px] font-semibold leading-none px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground">
                         {badge}
                       </span>
                     )}

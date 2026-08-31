@@ -114,7 +114,7 @@ export default function VerifyEmailPage() {
         {/* Primary CTA after confirming */}
         <Link
           href="/login"
-          className="mt-6 flex w-full items-center justify-center rounded-lg bg-[#2DE2B1] px-4 py-2.5 text-sm font-semibold text-[#071A1B] hover:bg-[#25c99e] transition-colors"
+          className="mt-6 flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           I confirmed my email &mdash; Sign in
         </Link>

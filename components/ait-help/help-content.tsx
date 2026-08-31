@@ -96,8 +96,8 @@ export function AitHelpContent() {
         return (
           <div key={section.title} className="flex flex-col gap-2">
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-6 h-6 rounded-md bg-[#2DE2B1]/10 flex items-center justify-center">
-                <Icon className="w-3.5 h-3.5 text-[#2DE2B1]" />
+              <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+                <Icon className="w-3.5 h-3.5 text-primary" />
               </div>
               <h2 className="text-sm font-semibold text-foreground">{section.title}</h2>
             </div>
@@ -115,7 +115,7 @@ export function AitHelpContent() {
                     className={cn(
                       "w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors",
                       isOpen
-                        ? "bg-[#2DE2B1]/5 border-b border-border/60"
+                        ? "bg-primary/5 border-b border-border/60"
                         : "hover:bg-muted/40",
                     )}
                   >
@@ -123,7 +123,7 @@ export function AitHelpContent() {
                       {item.q}
                     </span>
                     {isOpen ? (
-                      <ChevronUp className="w-4 h-4 text-[#2DE2B1] flex-shrink-0" />
+                      <ChevronUp className="w-4 h-4 text-primary flex-shrink-0" />
                     ) : (
                       <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     )}
@@ -141,17 +141,17 @@ export function AitHelpContent() {
       })}
 
       {/* Contact block */}
-      <div className="bg-[#071A1B] border border-[#2DE2B1]/10 rounded-xl p-5 flex items-start gap-4">
-        <div className="w-10 h-10 rounded-xl bg-[#2DE2B1]/10 flex items-center justify-center flex-shrink-0">
-          <MessageCircle className="w-5 h-5 text-[#2DE2B1]" />
+      <div className="bg-sidebar border border-primary/10 rounded-xl p-5 flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <MessageCircle className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-[#E8F4F5]">Still have a question?</h3>
-          <p className="text-xs text-[#C8D8D9]/70 mt-1 leading-relaxed">
+          <h3 className="text-sm font-semibold text-sidebar-foreground">Still have a question?</h3>
+          <p className="text-xs text-sidebar-foreground/70 mt-1 leading-relaxed">
             Contact the Signal support team at{" "}
             <a
               href="mailto:support@signal.app"
-              className="text-[#2DE2B1] hover:underline"
+              className="text-primary hover:underline"
             >
               support@signal.app
             </a>{" "}

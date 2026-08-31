@@ -8,13 +8,16 @@ export function DataUnavailable({
   missingMembership?: boolean
 }) {
   const Icon = missingMembership ? Building2 : AlertCircle
-  const accentColor = missingMembership ? "#67D9FF" : "#FF6B6B"
+  const accentColor = missingMembership ? "var(--ait-blue)" : "var(--ait-coral)"
 
   return (
     <div className="bg-card border border-border/60 rounded-xl p-8 text-center animate-fade-in">
       <div
         className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center"
-        style={{ background: `${accentColor}18`, border: `1px solid ${accentColor}30` }}
+        style={{
+          background: `color-mix(in srgb, ${accentColor} 16%, transparent)`,
+          border: `1px solid color-mix(in srgb, ${accentColor} 28%, transparent)`,
+        }}
       >
         <Icon className="w-5 h-5" style={{ color: accentColor }} />
       </div>

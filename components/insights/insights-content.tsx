@@ -113,15 +113,15 @@ export function InsightsContent({ data }: { data: InsightsData }) {
   }, [data, period])
 
   const kpis = [
-    { label: "Conversation volume", value: metrics.conversations, note: `Created in ${period} days`, accent: "#2DE2B1" },
-    { label: "Contacts reached", value: metrics.contactsReached, note: `${data.totalContacts} total stored`, accent: "#67D9FF" },
-    { label: "Messages", value: metrics.messages, note: `Stored in ${period} days`, accent: "#2DE2B1" },
-    { label: "Needs human now", value: data.currentNeedsHuman, note: "Current state", accent: "#FF6B6B" },
+    { label: "Conversation volume", value: metrics.conversations, note: `Created in ${period} days`, accent: "var(--primary)" },
+    { label: "Contacts reached", value: metrics.contactsReached, note: `${data.totalContacts} total stored`, accent: "var(--ait-blue)" },
+    { label: "Messages", value: metrics.messages, note: `Stored in ${period} days`, accent: "var(--primary)" },
+    { label: "Needs human now", value: data.currentNeedsHuman, note: "Current state", accent: "var(--destructive)" },
   ]
 
   const resolutionRows = [
-    { label: "AI-only resolved", value: metrics.aiOnlyResolved, color: "#2DE2B1", icon: CheckCircle2 },
-    { label: "Manager assisted", value: metrics.managerAssisted, color: "#67D9FF", icon: Users },
+    { label: "AI-only resolved", value: metrics.aiOnlyResolved, color: "var(--primary)", icon: CheckCircle2 },
+    { label: "Manager assisted", value: metrics.managerAssisted, color: "var(--ait-blue)", icon: Users },
     { label: "Other resolved", value: metrics.otherResolved, color: "var(--muted-foreground)", icon: MessageSquare },
   ]
 
@@ -142,7 +142,7 @@ export function InsightsContent({ data }: { data: InsightsData }) {
               className={cn(
                 "px-3 py-1 text-xs rounded-md font-medium transition-all",
                 period === days
-                  ? "bg-[#2DE2B1] text-[#071A1B]"
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
               )}
             >
@@ -169,7 +169,7 @@ export function InsightsContent({ data }: { data: InsightsData }) {
           <Card className="border-border/60 bg-card">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-[#2DE2B1]" />
+                <BarChart3 className="w-4 h-4 text-primary" />
                 <h2 className="text-sm font-semibold text-foreground">Top topics</h2>
               </div>
             </CardHeader>
@@ -187,7 +187,7 @@ export function InsightsContent({ data }: { data: InsightsData }) {
           <Card className="border-border/60 bg-card">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#67D9FF]" />
+                <Clock className="w-4 h-4 text-[var(--ait-blue)]" />
                 <h2 className="text-sm font-semibold text-foreground">Inbound message hours</h2>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -227,7 +227,7 @@ export function InsightsContent({ data }: { data: InsightsData }) {
                     <Bar
                       dataKey="count"
                       name="Inbound messages"
-                      fill="#2DE2B1"
+                      fill="var(--primary)"
                       fillOpacity={0.75}
                       radius={[3, 3, 0, 0]}
                     />
@@ -242,7 +242,7 @@ export function InsightsContent({ data }: { data: InsightsData }) {
         <Card className="border-border/60 bg-card">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-[#2DE2B1]" />
+              <MessageSquare className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">Response &amp; resolution</h2>
             </div>
             <p className="text-xs text-muted-foreground">
