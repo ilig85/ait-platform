@@ -136,7 +136,7 @@ export class SupabaseOutboundMessageStore implements OutboundMessageStore {
     const [connectionResult, contactResult] = await Promise.all([
       this.userClient
         .from("channel_connections")
-        .select("id, organization_id, provider, channel_type, status")
+        .select("id, organization_id, provider, channel_type, status, external_account_id, connected_phone_number")
         .eq("id", conversation.channelConnectionId)
         .eq("organization_id", conversation.organizationId)
         .maybeSingle(),
@@ -154,15 +154,23 @@ export class SupabaseOutboundMessageStore implements OutboundMessageStore {
 
     const connection = connectionResult.data
     const recipientExternalId = contactResult.data?.external_contact_id ?? contactResult.data?.phone_number
-    if (
-      !connection
-      || connection.provider !== "meta_cloud"
-      || connection.channel_type !== "whatsapp"
-      || !recipientExternalId
-    ) {
-      return null
+    if (!connection || connection.channel_type !== "whatsapp" || !recipientExternalId) return null
+
+    if (connection.provider === "baileys") {
+      const externalAddressId = connection.external_account_id ?? connection.connected_phone_number
+      if (!externalAddressId) return null
+      return {
+        id: connection.id,
+        organizationId: connection.organization_id,
+        provider: connection.provider,
+        status: connection.status,
+        externalAddressId,
+        externalBusinessAccountId: null,
+        recipientExternalId,
+      }
     }
 
+    if (connection.provider !== "meta_cloud") return null
     const mappingResult = await this.admin
       .from("meta_whatsapp_connections")
       .select("phone_number_id, waba_id")

@@ -26,3 +26,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Baileys linked-device credentials and worker build output
+/workers/baileys/auth/
+/workers/baileys/dist/
+/workers/baileys/node_modules/
